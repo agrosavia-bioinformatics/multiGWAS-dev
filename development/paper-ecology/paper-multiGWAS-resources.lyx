@@ -75,6 +75,641 @@ GWAS Paper Test Resources
 \end_layout
 
 \begin_layout Description
+Multiple_hypothesis_testing:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Childs2012: 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+As the very nature of GWAS involves hundreds of thousands of accession-phenotype
+ association tests, multiple testing correction needs to be addressed.
+ To this end, the Benjamini-Hochberg method (Benjamini and Hochberg, 1995)
+ is employed to correct the pro- vided P values.
+ Another approach is to visually ob- serve how the most significant P values
+ deviate from the expected distribution.
+ Ideally, a higher than ex- pected fraction of marker-associated P values
+ will be skewed toward significant values.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Inflation_factor: 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Gumpinger2018:
+\series default
+ 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Deviations for a high number of markers, especially in the range of intermediate
+ to high p-values, indicate the presence of confounders that artificially
+ inflate the p-values (e.g., Fig.
+ 3a).
+ This inflation can be caused, for example, by population structure or cryptic
+ relatedness among the individuals.
+ As mentioned in Subheadings 1.3.1 and 3.4—for population structure—a correction
+ needs to be performed in order to avoid reporting false positive results
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Gumpinger2018: 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+A common way to assess the degree of population structure in the data is
+ to compute the genomic inflation factor λGC [55].
+ It describes the deviation of the median of the observed test statistics
+ from the median of the expected test statistics.
+ Since the distribution of the test statistics under the null hypothesis
+ is known (either because there is a closed form representation, or because
+ it has been derived empirically using permutation testing), so is its median.
+ Considering the assumption that most of the SNPs are not associated with
+ the trait, λGC should be close to one if no confounder is present [56].
+ If λGC is inflated (larger than 1) or deflated (lower than 1), a correction
+ for population structure is recommended to avoid false positives or false
+ negatives, respectively.
+ The inflation or deflation of p-values can be easily visualized in a Q-Q
+ plot (refer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Rosyara2016: 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+follow a uniform distribution under the null hypothesis.
+ The inflation of p-values above the y = x line in such a plot is an indicator
+ of the failure of the model to control for population structure.
+ Inflation was quantified by the linear regression coefficient of the observed
+ vs.
+ expected – log10 p-values, denoted l, which has a value of 1 under the
+ null hypothesis (Riedelsheimer et al., 2012).
+ log10 p-values, denoted l, which has a value of 1 under the null hypothesis
+ (Riedelsheimer et al., 2012).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Powel2016: 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+However, a calculation of the lambda value (λ; also known as the genomic
+ inflation factor), which is derived by dividing the median value of the
+ observed chi-squared statistic by the median expected chi-squared statistic
+ (for P = 0.5)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+Significance_level:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Rosyara2016: 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Three different methods are available in GWASpoly for establishing a p-value
+ detection threshold for statisti- cal significance.
+ The first is the Bonferroni correction, which uses a threshold of a/m to
+ ensure the genome- wide type I error with m markers is no greater than
+ a.
+ The second approach is the random permutation test, in which phenotypes
+ are randomly permuted to explicitly construct the genome-wide null distribution
+ of p-values (Churchill and Doerge, 1994).
+ The third option uses the qvalue package (Storey and Tibshirani, 2003)
+ to control the genome-wide false discovery rate (rather than Type I error
+ = probability of false positive).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Thomson2011: 
+\begin_inset Note Comment
+status collapsed
+
+\begin_layout Plain Layout
+
+\series bold
+Genome-wide significance:
+\end_layout
+
+\begin_layout Plain Layout
+One issue that causes much concern in the meta-analysis of GWAS is the definitio
+n of the level of evidence required to be confident that an effect is not
+ due to chance.
+ Like primary GWAS, meta-analyses usually define P-value thresholds at which
+ they will declare a finding to be genome-wide significant, often values
+ around the 5?10?7 or 10?8 are used [55–57], perhaps combined with a less
+ stringent level of 10?5 or 10?6 at which variants will be considered interestin
+g enough to warrant further investigation.
+ Given the huge number of variants that are available for study, such low
+ P-value thresholds are required to guard against the production of large
+ numbers of false positives; however, they have the drawback that such conservat
+ism may cause many variants with small real effects to be overlooked.
+ The concept of genome-wide significance comes from viewing a GWAS, or the
+ meta-analysis of GWAS, as a giant test of thousands or millions of independent
+ hypotheses.
+ However, due to the cor- relation between variants it is very difficult
+ to specify separate hypotheses meaningfully and because of the many different
+ ways in which a variant can act on a trait it is almost impossible to say
+ in advance what statistical assumptions can be made when specifying the
+ meta-analysis.
+ As
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Pearson2008: 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+The GWA approach is revolution- ary because it permits interrogation of
+ The GWA approach is revolution- ary because it permits interrogation of
+ the entire human genome at levels of ary because it permits interrogation
+ of the entire human genome at levels of resolution previously unattainable,
+ in the entire human genome at levels of resolution previously unattainable,
+ in thousands ofunrelated individuals, un-resolution previously unattainable,
+ in thousands ofunrelated individuals, un- constrained by prior hypotheses
+ re-thousands ofunrelated individuals, un- constrained by prior hypotheses
+ re- garding genetic associations with dis-constrained by prior hypotheses
+ re- garding genetic associations with dis- ease.4 However, theGWAapproach
+ can garding genetic associations with dis- ease.4 However, theGWAapproach
+ can also be problematic because the mas-garding genetic associations with
+ dis- ease.4 However, theGWAapproach can also be ease.4 However, theGWAapproach
+ can also be problematic because the mas- sive number of statistical tests
+ per-also be problematic because the mas- sive number of statistical tests
+ per- formed presents an unprecedented po-sive number of statistical tests
+ per- formed presents an unprecedented po- tential for false-positive results,
+ leading formed presents an unprecedented po- tential for false-positive
+ results, leading to new stringency in acceptable levels tential for false-posit
+ive results, leading to new stringency in acceptable levels of statistical
+ significance and require-to new stringency in acceptable levels of statistical
+ significance and require- ments for replication of findings.5 of statistical
+ significance and require- ments for replication of findings.5 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Gumpinger2018:
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+In a traditional (univariate) genome-wide association study, a measure of
+ association or statistical dependence between each individual SNP and the
+ phenotype is computed.
+ Then a p-value is derived for each association score, which represents
+ the probability of observing an association signal of the same strength
+ or stronger under the null hypothesis of no association between the SNP
+ and the phenotype.
+ If the p-value falls below a predefined significance threshold α, commonly
+ 0.01 or 0.05, the null hypothesis is rejected, which means that there is
+ an association between the SNP and the phenotype.
+ Despite the strong evidence against the null hypothesis in this case, there
+ remains a chance of α∗ 100% that the low p-value is purely due to random
+ chance and that the detected association is therefore a false positive
+ result.
+ Avoiding false positive findings is among the major challenges in GWAS.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Threshold
+\begin_inset CommandInset label
+LatexCommand label
+name "Threshold:"
+
+\end_inset
+
+: 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\series bold
+Rosyara2016
+\series default
+: 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Three different methods are available in GWASpoly for establishing a p-value
+ detection threshold for statisti- cal significance.
+ The first is the Bonferroni correction, which uses a threshold of a/m to
+ ensure the genome- wide type I error with m markers is no greater than
+ a.
+ The second approach is the random permutation test, in which phenotypes
+ are randomly permuted to explicitly construct the genome-wide null distribution
+ of p-values (Churchill and Doerge, 1994).
+ The third option uses the qvalue package (Storey and Tibshirani, 2003)
+ to control the genome-wide false discovery rate (rather than Type I error
+ = probability of false positive).
+ For the simulations, due to their computationally intensive nature, we
+ used the Bonferroni correction with a = 0.05.
+ For the analysis of the real potato data, we used the permutation test
+ with 1000 permutations and genome-wide a = 0.05.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Gumpinger2018
+\series default
+: 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+In a traditional (univariate) genome-wide association study, a measure of
+ association or statistical dependence between each individual SNP and the
+ phenotype is computed.
+ Then a p-value is derived for each association score, which represents
+ the probability of observing an association signal of the same strength
+ or stronger under the null hypothesis of no association between the SNP
+ and the phenotype.
+ If the p-value falls below a predefined significance threshold α, commonly
+ 0.01 or 0.05, the null hypothesis is rejected, which means that there is
+ an association between the SNP and the phenotype.
+ Despite the strong evidence against the null hypothesis in this case, there
+ remains a chance of α∗ 100% that the low p-value is purely due to random
+ chance and that the detected association is therefore a false positive
+ result.
+ Avoiding false positive findings is among the major challenges in GWAS.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Wikipedia2020: 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+However, there has been some criticism of this threshold, with a 2012 study
+ suggesting that a significant number of associations with p-values just
+ above this threshold are genuine, replicable associations.
+ The authors of this study concluded that their finding "...suggests a possible
+ relaxation in the current GWS threshold."[3] More recently, it has been
+ suggested that the conventional threshold should be modified to take into
+ account the increasing prevalence of low-frequency genetic variants in
+ genome-wide association studies.[4] References
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Low_pvalues:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+https://www.researchgate.net/post/How_do_I_adjust_the_p_value_of_SNPs-phenotype_as
+sociation_study_for_multiple_testing:
+\begin_inset Note Comment
+status collapsed
+
+\begin_layout Plain Layout
+Don't adjust the p values.
+ Instead, adjust the threshold below which a p value is considered significant.
+ This is the standard practice in genomics.
+ The formulat is simple: Multiply the number of genetic markers by the number
+ of phenotypes.
+ This gives you the number of hypotheses tested.
+ Then, divide 0.05 by that number.
+ You now have the threshold below which a pa value is considered significant.
+ It is much more transparent than adjusting the p itself.
+ It may be a bit too conservative if the SNPs are in substantial LD (a problem
+ that adjusting the p-value itself doesn't abolish).
+ If it is a genome-wide study, where you reasonably expect a very large
+ number of true positives (e.g.
+ hundreds, such as in genome-wide eQTL searches) the false discovery rate
+ (q value) makes much more sense and is much more powerful.
+ Q-VALUE is an implementation of the required calculations (http://genomics.princ
+eton.edu/storeylab/qvalue/) but I prefer to do mine on an Excel sheet, so
+ I can plot the data my way.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Thomson2011: 
+\begin_inset Note Comment
+status collapsed
+
+\begin_layout Itemize
+Like primary GWAS, meta-analyses usually define P-value thresholds at which
+ they will declare a finding to be genome-wide significant, often values
+ around the 5?10?7 or 10?8 are used [55–57], perhaps combined with a less
+ strin- gent level of 10?5 or 10?6 at which variants will be considered
+ interesting enough to warrant further in- vestigation.
+ Given the huge number of variants that are available for study, such low
+ P-value thresholds are required to guard against the production of large
+ numbers of false positives; however, they have the drawback that such conservat
+ism may cause many variants with small real effects to be overlooked.
+\end_layout
+
+\begin_layout Itemize
+As a consequence, the testing paradigm is unhelpful and it is better to
+ view the discovery of new variants, not as a series of tests, paradigm
+ is unhelpful and it is better to view the discovery of new variants, not
+ as a series of tests, but as an exploration, in which the P-values are
+ a convenient screening tool rather than a measure of the strength of evidence.
+ convenient screening tool rather than a measure of the strength of evidence.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+GWAS_models:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Sharma2018:
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+GWAS model procedures were as described by Yu et al.
+ (2006) imple- mented in GWASpoly R package (Rosyara et al.
+ 2016) using additive model; and follow the linear mixedmodel equation as
+ expressed below: 
+\end_layout
+
+\begin_layout Plain Layout
+y = XB+ Sa + Qv + Zu + e 
+\end_layout
+
+\begin_layout Plain Layout
+where y is a vector of observed phenotypes; b is a vector of fixed effects
+ other than the SNP under testing and/or population structure effects; a
+ is a vector of SNP effects; v is a vector of population effects where Q,
+ modeled as a fixed effect, refers to the incidence matrix for subpopulation
+ covariates relating y to v; m is a vector of random polygenic background
+ effects with covariance proportional to a kin- ship matrix Kwith Var[m]=
+ sg 2K; e is a vector ofresidual effects with Var[e]= Ise 2; X, S and Z
+ are incidence matrices of 1s and 0s relating yto b, a and m, respectively;
+ and sg 2 and se 2 denote genetic and residual variance, respectively.
+ This mixed model equation was adap- ted to perform GWAS using four different
+ statistical models, as de- tailed below:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Gapit2010:
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+A mixed linear model (MLM) includes both fixed and random effects.
+ Including individuals as random effects gives an MLM the ability to incorporate
+ information about relationships among individuals.
+ This information about relationships is conveyed through the kinship (K)
+ matrix, which is used in an MLM as the variance-covariance matrix between
+ the individuals.
+ When a genetic marker-based kinship matrix (K) is used jointly with population
+ structure (commonly called the “Q” matrix, and can be obtained through
+ STRUCTURE11 or conducting a principal component analysis12), the “Q+K”
+ approach improves statistical power compared to “Q” only9.
+ An MLM can be described using Henderson’s matrix notation6 as follows:
+ Y = Xβ + Zu + e, (1) where Y is the vector of observed phenotypes; β is
+ an unknown vector containing fixed effects, including the genetic marker,
+ population structure (Q), and the intercept; u is an unknown vector of
+ random additive genetic effects from multiple background QTL for individuals/li
+nes; X and Z are the known design matrices; and e is the unobserved vector
+ of residuals.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Alvarex2017: 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Association analysis was conducted with Tassel 5 software (Bradbury et al.,
+ 2007).
+ Three analyses were done with the general linear model (GLM) and three
+ more with the mixed linear model (MLM).
+ The first GLM included no additional parameters, the second included the
+ population structure (GLMQ), and the third included the PCA population
+ estimation as parameter (GLMPC).
+ The association analysis with the MLM was performed including either kinship
+ alone, kinship and PCA or kinship and population structure.
+ The mixed model used was as follows: Yi
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Input_formats:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Chen2018:
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Input file formats are automatically converted to the formats corresponding
+ to the specified CLI packages.
+ iPat uses the first three lines of each input file to determine the formats.
+ Acceptable geno-type formats include hapmap, numerical, VCF, PLINK and
+ BLINK.
+ Phenotype formats are acceptable with or without individual identi-fication.
+ When input data formats match the chosen CLI package format requirements,
+ analyses are conducted directly.
+ Otherwise, format conversion is performed first.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+GWASpoly2016:
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+The first column of the phenotype file contains the genotype identifier,
+ columns 2 through (n.traits + 1) contain trait values, and subsequent columns
+ contain the levels (for factors) or numeric values (for covariates) of
+ any fixed effects.
+ The first three columns of the genotype file are (1) marker name, (2) chromosom
+e, and (3) position.
+ Subsequent columns contain the marker data for each individual in the populatio
+n.
+ Marker data can be coded in one of three formats: • "numeric" = markers
+ are coded based on the dosage of the alternate allele, taking on integer
+ values between 0 and ploidy (fractional values not allowed) • "AB" format
+ (e.g., AAAB, ABBB for tetraploids) • "ACGT" format (e.g., AAAT, GGCC for tetraploid
+s) Only bi-allelic markers are allowed.
+ Missing marker data will be imputed with the population mode (most frequent
+ value) for each marker.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Tassel2014:
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Plink is a whole genome association analysis tool set, which comes with
+ its own text based data format.
+ The data is stored in a set of two files, a .map file and a .ped file.
+ The .ped file contains all the SNP values and has six mandatory header columns
+ for Family ID, Individual ID, Paternal ID, Maternal ID, Sex and Phenotype.
+ TASSEL only requires that the Individual ID field be filled in.
+ Each row of the .ped file describes a single germplasm line.
+ Notice in Plink, an unknown character is represented with a '0'.
+ However in TASSEL an unknown character is represented with a 'N', and '0'
+ is used to represent heterozygous indel.
+ TASSEL will automatically convert between the '0' and the 'N'.
+ Any exported Plink files will represent the heterozygous indel with a '+'
+ (insertion) and a '-?' (deletion).
+ The .map file describes all the SNPs in the associated .ped file, where each
+ row provides information on one SNP.
+ The .map file must contain exactly four columns: Chromosome, rs#, Genetic
+ distance and Position.
+ TASSEL does Plink is a whole genome association analysis tool set, which
+ comes with its own text based data format.
+ The data is stored in a set of two files, a .map file and a .ped file.
+ The .ped file contains all the SNP values and has six mandatory header columns
+ for Family ID, Individual ID, 11
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Output_results:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Chen2018:
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Display results are presented uniformly with the same array of information
+ and graphics, regardless of which CLI package is used.
+ Most CLI packages produce a limited set of results, such P-values and genomic
+ predictions.
+ iPat uses the display functions in GAPIT as the universal set of result
+ graphics, which include Manhattan plots, QQ plots and heat maps for prediction
+ and accuracy distribution.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
 Allele_dosage:
 \end_layout
 
@@ -82,12 +717,36 @@ Allele_dosage:
 \begin_layout Itemize
 Bourke2018: 
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
 We use the term marker “dosage” to denote the minor allele count of a marker;
  a species of ploidy q possesses q + 1 distinct dosage classes in the range
  0 to q
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Classically, there are three genotypic test models, i.e.
+ dominant/recessive/additive for exploring the genotypic and phenotypic
+ association studies.
+ In Li et al.'s article, unfortunately, the authors gave a wrong description
+ on the dominant and recessive models.
+\end_layout
+
+\begin_layout Plain Layout
+Up to date, there is often no concrete evidence of the genetic mode of inheritan
+ce in the studies of complex disease genes.
+ Most studies test multiple genetic models to explore the biological rationale
+ behind the preference of these genetic models
 \end_layout
 
 \end_inset
@@ -173,6 +832,57 @@ Replication:
 \end_layout
 
 \begin_deeper
+\begin_layout Itemize
+De2014:
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+The biggest concern regarding GWAS results has been the lack of replication
+ of genotype–phenotype associations in an independent The biggest concern
+ regarding GWAS results has been the lack of replication of genotype–phenotype
+ associations in an independent study.
+ But an equally formidable challenge is to ensure that a replication of
+ genotype–phenotype associations in an independent study.
+ But an equally formidable challenge is to ensure that a replication study
+ has suffi cient statistical power to detect the initial study.
+ But an equally formidable challenge is to ensure that a replication study
+ has suffi cient statistical power to detect the initial fi nding.
+ Accordingly, meta-analysis and data imputation procedures replication study
+ has suffi cient statistical power to detect the initial fi nding.
+ Accordingly, meta-analysis and data imputation procedures can help to tackle
+ this type of challenge.
+ fi nding.
+ Accordingly, meta-analysis and data imputation procedures can help to tackle
+ this type of challenge.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+The sole purpose of a replication study is to evaluate an initial positive
+ fi nding from a GWAS and replicate it to assert its validity and give the
+ association higher credibility.
+ But, despite the general positive fi nding from a GWAS and replicate it
+ to assert its validity and give the association higher credibility.
+ But, despite the general consensus regarding its importance, what actually
+ constitutes a and give the association higher credibility.
+ But, despite the general consensus regarding its importance, what actually
+ constitutes a replication is still up for debate.
+ This was the topic of a National Human Genome Research Institute (NHGRI)
+ working group—to outline various criteria involved in defi ning a replication
+ of a GWAS Human Genome Research Institute (NHGRI) working group—to outline
+ various criteria involved in defi ning a replication of a GWAS result [
+ 63 ].
+ outline various criteria involved in defi ning a replication of a GWAS
+ result [ 63 ].
+ One of
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Itemize
 Gonzales2012:
 \begin_inset Note Note
@@ -406,83 +1116,6 @@ re of complex phenotypes at an unprecedented level of detail using genome-wide
  and already includes published data and results from several major GWAS.
  We demonstrate the potential of easyGWAS with a case study of the model
  organism Arabidopsis thaliana, using flowering and growth-related traits.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_deeper
-\begin_layout Description
-Threshold
-\begin_inset CommandInset label
-LatexCommand label
-name "Threshold:"
-
-\end_inset
-
-: 
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-
-\series bold
-Rosyara2016
-\series default
-: 
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-Three different methods are available in GWASpoly for establishing a p-value
- detection threshold for statisti- cal significance.
- The first is the Bonferroni correction, which uses a threshold of a/m to
- ensure the genome- wide type I error with m markers is no greater than
- a.
- The second approach is the random permutation test, in which phenotypes
- are randomly permuted to explicitly construct the genome-wide null distribution
- of p-values (Churchill and Doerge, 1994).
- The third option uses the qvalue package (Storey and Tibshirani, 2003)
- to control the genome-wide false discovery rate (rather than Type I error
- = probability of false positive).
- For the simulations, due to their computationally intensive nature, we
- used the Bonferroni correction with a = 0.05.
- For the analysis of the real potato data, we used the permutation test
- with 1000 permutations and genome-wide a = 0.05.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-
-\series bold
-Gumpinger2018
-\series default
-: 
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-In a traditional (univariate) genome-wide association study, a measure of
- association or statistical dependence between each individual SNP and the
- phenotype is computed.
- Then a p-value is derived for each association score, which represents
- the probability of observing an association signal of the same strength
- or stronger under the null hypothesis of no association between the SNP
- and the phenotype.
- If the p-value falls below a predefined significance threshold α, commonly
- 0.01 or 0.05, the null hypothesis is rejected, which means that there is
- an association between the SNP and the phenotype.
- Despite the strong evidence against the null hypothesis in this case, there
- remains a chance of α∗ 100% that the low p-value is purely due to random
- chance and that the detected association is therefore a false positive
- result.
- Avoiding false positive findings is among the major challenges in GWAS.
 \end_layout
 
 \end_inset
@@ -928,112 +1561,6 @@ When dealing with quantitative phenotypes, linear regression approaches
 
 \end_deeper
 \begin_layout Description
-Inflation_factor:
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-
-\series bold
-Gumpinger2018:
-\series default
- 
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-Deviations for a high number of markers, especially in the range of intermediate
- to high p-values, indicate the presence of confounders that artificially
- inflate the p-values (e.g., Fig.
- 3a).
- This inflation can be caused, for example, by population structure or cryptic
- relatedness among the individuals.
- As mentioned in Subheadings 1.3.1 and 3.4—for population structure—a correction
- needs to be performed in order to avoid reporting false positive results
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_deeper
-\begin_layout Description
-Multiple_hypothesis_testing:
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-Childs2012: 
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-As the very nature of GWAS involves hundreds of thousands of accession-phenotype
- association tests, multiple testing correction needs to be addressed.
- To this end, the Benjamini-Hochberg method (Benjamini and Hochberg, 1995)
- is employed to correct the pro- vided P values.
- Another approach is to visually ob- serve how the most significant P values
- deviate from the expected distribution.
- Ideally, a higher than ex- pected fraction of marker-associated P values
- will be skewed toward significant values.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_deeper
-\begin_layout Description
-Inflation_factor: 
-\end_layout
-
-\begin_layout Itemize
-Powel2016: 
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-However, a calculation of the lambda value (λ; also known as the genomic
- inflation factor), which is derived by dividing the median value of the
- observed chi-squared statistic by the median expected chi-squared statistic
- (for P = 0.5)
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-Gumpinger2018: 
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-A common way to assess the degree of population structure in the data is
- to compute the genomic inflation factor λGC [55].
- It describes the deviation of the median of the observed test statistics
- from the median of the expected test statistics.
- Since the distribution of the test statistics under the null hypothesis
- is known (either because there is a closed form representation, or because
- it has been derived empirically using permutation testing), so is its median.
- Considering the assumption that most of the SNPs are not associated with
- the trait, λGC should be close to one if no confounder is present [56].
- If λGC is inflated (larger than 1) or deflated (lower than 1), a correction
- for population structure is recommended to avoid false positives or false
- negatives, respectively.
- The inflation or deflation of p-values can be easily visualized in a Q-Q
- plot (refer
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Description
 Genomic_data_formats:
 \end_layout
 
@@ -1041,7 +1568,7 @@ Genomic_data_formats:
 \begin_layout Itemize
 http://zzlab.net/blink/BLINK_User_Manual.pdf: 
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Itemize
 

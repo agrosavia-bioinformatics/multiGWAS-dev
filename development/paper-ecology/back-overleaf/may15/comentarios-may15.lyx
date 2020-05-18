@@ -1,0 +1,278 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Comentarios
+\end_layout
+
+\begin_layout Section*
+Abstract
+\end_layout
+
+\begin_layout Itemize
+Referirse a los tools externos como 
+\begin_inset Quotes eld
+\end_inset
+
+packages
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Nombra todas las etapas de analysis en: 
+\begin_inset Quotes eld
+\end_inset
+
+The tool deals with all the elements of the GWAS process in the four software,
+ including
+\begin_inset Quotes erd
+\end_inset
+
+:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\series bold
+Data input management
+\series default
+: convesion between different formats
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Data preprocessing
+\series default
+: cleaning and quality filters
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Test for asociations
+\series default
+: set GWAS parameters and run in parallel the GWAS packages
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Replication:
+\series default
+ Output reports with tables and plots showing integrated results.
+\end_layout
+
+\end_deeper
+\begin_layout Section
+Introducción
+\end_layout
+
+\begin_layout Itemize
+34: Sigla GWAS después del nombre
+\end_layout
+
+\begin_layout Itemize
+48: Cambiar 
+\emph on
+involved 
+\emph default
+por 
+\emph on
+involve
+\end_layout
+
+\begin_layout Itemize
+En los 3 desafios, se debería expresarlos como acciones:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+1.
+ Replicación de resultados de estudios de GWAS.
+\end_layout
+
+\begin_layout Itemize
+2.
+ Desarrollo de herramientas para estudios GWAS en poliploides.
+\end_layout
+
+\begin_layout Itemize
+3.
+ Integración de resultados de diferentes estudios de GWAS.
+\end_layout
+
+\end_deeper
+\begin_layout Section
+Method
+\end_layout
+
+\begin_layout Itemize
+Unificar nombres 
+\emph on
+step 
+\emph default
+por 
+\emph on
+stage
+\end_layout
+
+\begin_layout Itemize
+Primera etapa: adjustement: 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Procesa archivo de configuracion
+\end_layout
+
+\begin_layout Itemize
+Convierte los diferentes formatos de datos genómicos:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Posiblemente tres formatos:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Matrix type with map info (GWASpoly): 2 files geno/pheno
+\end_layout
+
+\begin_layout Itemize
+Numeric without map info (Cluster call): 2 files geno/pheno
+\end_layout
+
+\begin_layout Itemize
+PLINK: three file: .map, .ped, phenotype
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Itemize
+Limpia y Filtra los datos de entrada.
+\end_layout
+
+\begin_layout Itemize
+Diploidiza genotipo y convierte los datos a los formatos aceptados por las
+ herramientas.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Segunda etapa: multi analysis:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Crea la configuración específica para ejecutar cada paquete GWAS de acuerdo
+ a los parámetros GWAS y los datos genomicos
+\end_layout
+
+\begin_layout Itemize
+Ejecuta en paralelo los paquetes GWAS
+\end_layout
+
+\begin_layout Itemize
+Scan output files and create a single results file for each packages
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Tercera etapa: Integracion:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Integrate output results for each package
+\end_layout
+
+\begin_layout Itemize
+Create integrated outputs: tables and plots
+\end_layout
+
+\begin_layout Itemize
+Create a unified report
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\end_layout
+
+\end_body
+\end_document

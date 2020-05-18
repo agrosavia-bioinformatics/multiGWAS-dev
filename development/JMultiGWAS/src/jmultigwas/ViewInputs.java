@@ -21,8 +21,11 @@ public class ViewInputs extends javax.swing.JPanel {
         this.controller = controller;
         this.model = model;
         initComponents();
-        fieldOutputDir.setText(getLastDir().toString());
         setDefaults();
+        fieldOutputDir.setText(getLastDir().toString());
+        //fieldGeno.setText(getLastDir().toString());
+        //fieldPheno.setText(getLastDir().toString());
+        
     }
 
     public File getLastDir() {
@@ -212,13 +215,11 @@ public class ViewInputs extends javax.swing.JPanel {
         fieldOutputDir.setText("/home/lg/AAA");
         fieldOutputDir.setToolTipText("Select genotype file");
 
-        fieldPheno.setText("/home/lg/agrosavia/development/multiGWAS/examples/example-phenotype.tbl");
         fieldPheno.setToolTipText("Select phenotype file");
         fieldPheno.setPreferredSize(new java.awt.Dimension(90, 19));
 
         jLabel2.setText("Input Phenotype:");
 
-        fieldGeno.setText("/home/lg/agrosavia/development/multiGWAS/examples/example-genotype.tbl");
         fieldGeno.setToolTipText("Select genotype file");
         fieldGeno.setPreferredSize(new java.awt.Dimension(90, 19));
 
@@ -448,28 +449,22 @@ public class ViewInputs extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(panelFiltersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelFiltersLayout.createSequentialGroup()
-                        .addGroup(panelFiltersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(panelFiltersLayout.createSequentialGroup()
-                                .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(fieldFilterGENO, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(panelFiltersLayout.createSequentialGroup()
-                                .addGroup(panelFiltersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(panelFiltersLayout.createSequentialGroup()
-                                        .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(fieldFilterHWE, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(panelFiltersLayout.createSequentialGroup()
-                                        .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(fieldFilterMIND, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(fieldFilterGENO, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(panelFiltersLayout.createSequentialGroup()
+                        .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(fieldFilterHWE, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(panelFiltersLayout.createSequentialGroup()
+                        .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(fieldFilterMIND, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(panelFiltersLayout.createSequentialGroup()
                         .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(fieldFilterMAF, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addComponent(fieldFilterMAF, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         panelFiltersLayout.setVerticalGroup(
             panelFiltersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -539,7 +534,7 @@ public class ViewInputs extends javax.swing.JPanel {
 
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
-                prefs.put(LAST_USED_FOLDER, fc.getSelectedFile().getParent());
+                prefs.put(LAST_USED_FOLDER, fc.getSelectedFile().getAbsolutePath());
                 //This is where a real application would open the file.
                 fieldOutputDir.setText(file.getAbsolutePath());
                 setEnabledInputs(true);
