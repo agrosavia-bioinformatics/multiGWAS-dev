@@ -100,6 +100,36 @@ As the very nature of GWAS involves hundreds of thousands of accession-phenotype
 
 \end_layout
 
+\begin_layout Itemize
+Kaler2019: 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Determining the correct P-value threshold for statis- tical significance
+ is critical to differentiate true positives from false positives and false
+ negatives.
+ To determine the statistical significance threshold in GWAS, different
+ statistical procedures accounting for multiple testing have been proposed,
+ including the Bonferroni correc- tion, Sidak correction, False Discovery
+ Rate (FDR), per- mutation test, and Bayesian approaches.
+ Bonferroni correction and FDR [11–15] are the two most com- monly used
+ methods for crops limit type 1 errors (false-positives), but they almost
+ cer- tainly inflate type 2 errors (false negatives) [16].
+ The Bonferroni correction method is considered the most conservative method
+ for selecting a threshold P- value due to the assumption that every genetic
+ variant tested is independent of the rest.
+ The False Discovery Rate controls the expected proportion of false positives
+ among the rejected null hypotheses and is a popular, less conservative
+ approach compared to the Bonferroni cor- rection [15].
+ However,
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \end_deeper
 \begin_layout Description
 Inflation_factor: 
@@ -114,7 +144,7 @@ Gumpinger2018:
 \begin_inset Note Note
 status collapsed
 
-\begin_layout Plain Layout
+\begin_layout Itemize
 Deviations for a high number of markers, especially in the range of intermediate
  to high p-values, indicate the presence of confounders that artificially
  inflate the p-values (e.g., Fig.
@@ -123,6 +153,44 @@ Deviations for a high number of markers, especially in the range of intermediate
  relatedness among the individuals.
  As mentioned in Subheadings 1.3.1 and 3.4—for population structure—a correction
  needs to be performed in order to avoid reporting false positive results
+\end_layout
+
+\begin_layout Itemize
+A common way to assess the degree of population structure in the data is
+ to compute the genomic inflation factor λGC [55].
+ It describes the deviation of the median of the observed test statistics
+ from the median of the expected test statistics.
+ Since the distribution of the test statistics under the null hypothesis
+ is known (either because there is a closed form representation, or because
+ it has been derived empirically using permutation testing), so is its median.
+ Considering the assumption that most of the SNPs are not associated with
+ the trait, λGC should be close to one if no confounder is present [56].
+ If λGC is inflated (larger than 1) or deflated (lower than 1), a correction
+ for population structure is recommended to avoid false positives or false
+ negatives, respectively.
+ The inflation or deflation of p-values can be easily visualized in a Q-Q
+ plot (refer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Rosyara2016: 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+follow a uniform distribution under the null hypothesis.
+ The inflation of p-values above the y = x line in such a plot is an indicator
+ of the failure of the model to control for population structure.
+ Inflation was quantified by the linear regression coefficient of the observed
+ vs.
+ expected – log10 p-values, denoted l, which has a value of 1 under the
+ null hypothesis (Riedelsheimer et al., 2012).
+ 
 \end_layout
 
 \end_inset
@@ -140,33 +208,6 @@ However, a calculation of the lambda value (λ; also known as the genomic
  inflation factor), which is derived by dividing the median value of the
  observed chi-squared statistic by the median expected chi-squared statistic
  (for P = 0.5)
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-Gumpinger2018: 
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-A common way to assess the degree of population structure in the data is
- to compute the genomic inflation factor λGC [55].
- It describes the deviation of the median of the observed test statistics
- from the median of the expected test statistics.
- Since the distribution of the test statistics under the null hypothesis
- is known (either because there is a closed form representation, or because
- it has been derived empirically using permutation testing), so is its median.
- Considering the assumption that most of the SNPs are not associated with
- the trait, λGC should be close to one if no confounder is present [56].
- If λGC is inflated (larger than 1) or deflated (lower than 1), a correction
- for population structure is recommended to avoid false positives or false
- negatives, respectively.
- The inflation or deflation of p-values can be easily visualized in a Q-Q
- plot (refer
 \end_layout
 
 \end_inset
@@ -246,32 +287,18 @@ ism may cause many variants with small real effects to be overlooked.
 \begin_layout Itemize
 Pearson2008: 
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
-The GWA approach is revolution- ary because it permits interrogation of
- The GWA approach is revolution- ary because it permits interrogation of
- the entire human genome at levels of ary because it permits interrogation
- of the entire human genome at levels of resolution previously unattainable,
- in the entire human genome at levels of resolution previously unattainable,
- in thousands ofunrelated individuals, un-resolution previously unattainable,
- in thousands ofunrelated individuals, un- constrained by prior hypotheses
- re-thousands ofunrelated individuals, un- constrained by prior hypotheses
- re- garding genetic associations with dis-constrained by prior hypotheses
- re- garding genetic associations with dis- ease.4 However, theGWAapproach
- can garding genetic associations with dis- ease.4 However, theGWAapproach
- can also be problematic because the mas-garding genetic associations with
- dis- ease.4 However, theGWAapproach can also be ease.4 However, theGWAapproach
- can also be problematic because the mas- sive number of statistical tests
- per-also be problematic because the mas- sive number of statistical tests
- per- formed presents an unprecedented po-sive number of statistical tests
- per- formed presents an unprecedented po- tential for false-positive results,
- leading formed presents an unprecedented po- tential for false-positive
- results, leading to new stringency in acceptable levels tential for false-posit
-ive results, leading to new stringency in acceptable levels of statistical
- significance and require-to new stringency in acceptable levels of statistical
- significance and require- ments for replication of findings.5 of statistical
- significance and require- ments for replication of findings.5 
+The GWA approach is revolutionary because it permits interrogation of the
+ entire human genome at levels of resolution previously unattainable, in
+ thousands of unrelated individuals, unconstrained by prior hypotheses regarding
+ genetic associations with dis- ease.
+ However, the GWA approach can also be problematic because the massive number
+ of statistical tests performed presents an unprecedented potential for
+ false-positive results, leading to new stringency in acceptable levels
+ of statistical significance and requirements for replication of findings.
+ 
 \end_layout
 
 \end_inset
@@ -282,7 +309,7 @@ ive results, leading to new stringency in acceptable levels of statistical
 \begin_layout Itemize
 Gumpinger2018:
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
 In a traditional (univariate) genome-wide association study, a measure of
@@ -415,7 +442,7 @@ Low_pvalues:
 https://www.researchgate.net/post/How_do_I_adjust_the_p_value_of_SNPs-phenotype_as
 sociation_study_for_multiple_testing:
 \begin_inset Note Comment
-status collapsed
+status open
 
 \begin_layout Plain Layout
 Don't adjust the p values.
@@ -701,6 +728,30 @@ status collapsed
 We use the term marker “dosage” to denote the minor allele count of a marker;
  a species of ploidy q possesses q + 1 distinct dosage classes in the range
  0 to q
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Classically, there are three genotypic test models, i.e.
+ dominant/recessive/additive for exploring the genotypic and phenotypic
+ association studies.
+ In Li et al.'s article, unfortunately, the authors gave a wrong description
+ on the dominant and recessive models.
+\end_layout
+
+\begin_layout Plain Layout
+Up to date, there is often no concrete evidence of the genetic mode of inheritan
+ce in the studies of complex disease genes.
+ Most studies test multiple genetic models to explore the biological rationale
+ behind the preference of these genetic models
 \end_layout
 
 \end_inset

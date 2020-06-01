@@ -37,8 +37,7 @@ main <- function () {
 	phenotypeFile = "out/filtered-gwasp4-phenotype.tbl"
 	outputDir   = "report/"
 	gwasModel    = "Full"
-	reportTitle = "GWAS Report"
-	nBest = 8
+	nBest = 9
 
 	createReports (inputDir, genotypeFile, phenotypeFile, 
 				   gwasModel, outputDir, nBest)
@@ -52,7 +51,7 @@ main <- function () {
 #   4- 1 Venn diagram of significative SNPs
 #	5- 1 multiplot of 4x4 manhattan and QQ plots
 #-------------------------------------------------------------
-createReports <- function (inputDir, genotypeFile, phenotypeFile, gwasModel, outputDir, nBest=7) 
+createReports <- function (inputDir, genotypeFile, phenotypeFile, gwasModel, outputDir, nBest) 
 {
 	msgmsg ("Creating reports for ", gwasModel, " model...")
 	createDir (outputDir)
@@ -122,7 +121,9 @@ calculateInflationFactor <- function (scores)
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
 markersManhattanPlots <- function (inputDir, gwasModel, commonBest, commonSign, snpTables, outputDir, nBest=8) {
-	files =  list.files(inputDir, pattern=paste0("^(.*(",gwasModel,").*(scores)[^$]*)$"), full.names=T)
+	#files =  list.files(inputDir, pattern=paste0("^(.*(",gwasModel,").*(scores)[^$]*)$"), full.names=T)
+	files =  list.files(inputDir, pattern=sprintf ("(^(tool).*(%s).*[.](csv))", gwasModel), full.names=T)
+	print (files)
 	#pdf (paste0 (outputDir, "/out-summary.manhattan-qq-plots.pdf"), width=11, height=7)
 	op <- par(mfrow = c(4,2), mar=c(3.5,3.5,3,1), oma=c(0,0,0,0), mgp = c(2.2,1,0))
 	for (filename in files) {
@@ -151,6 +152,10 @@ markersManhattanPlots <- function (inputDir, gwasModel, commonBest, commonSign, 
 			tool = "TASSEL"
 			gwasResults = data.frame (SNP=data$Marker, CHR=data$Chr, BP=data$Pos, P=10^-data$SCORE)
 		}
+
+		message (paste (">>>", tool))
+		message (paste ("", dim(gwasResults)))
+
 		ss = snpTables$significatives
 		if (tool %in% ss$TOOL)
 			signThresholdScore = min (ss [ss$TOOL==tool,"SCORE"])
@@ -229,16 +234,13 @@ markersVennDiagrams <- function (summaryTable, gwasModel, scoresType, outFile){
 # Create a summary table of best and significative markers
 #------------------------------------------------------------------------
 markersSummaryTable <- function (inputDir, gwasModel, outputDir="out", nBest=5) {
-
-	map = read.table (file=paste0(inputDir,"/map.tbl"))
-	rownames (map) = map [,1]
-
-	files =  list.files(inputDir, pattern=paste0("^(.*(",gwasModel,").*(scores)[^$]*)$"), full.names=T)
+	files =  list.files(inputDir, pattern=sprintf ("(^(tool).*(%s).*[.](csv))", gwasModel), full.names=T)
 	msgmsg ("Creating summary table...")
 	summaryTable = data.frame ()
 
 	tool=""
 	for (f in files) {
+		msgmsg ("Processing output tool file: ", f)
 		data <- read.table (file=f, header=T)
 		#if (nrow(data)>nBest) data=data [1:nBest,] 
 		pVal	<- data$P
@@ -257,7 +259,7 @@ markersSummaryTable <- function (inputDir, gwasModel, outputDir="out", nBest=5) 
 			tool    = "PLINK"
 			snps    = data$SNP
 			chrom   = data$CHR
-			pos	    = map [snps, "Position"]
+			pos	    = data$POS
 			flagNewData = T
 		}else if (grepl ("TASSEL", f)) {
 			tool    = "TASSEL"
@@ -268,11 +270,12 @@ markersSummaryTable <- function (inputDir, gwasModel, outputDir="out", nBest=5) 
 		}else if (grepl ("SHEsis", f)) {
 			tool    = "SHEsis"
 			snps    = data$SNP
-			chrom	= map [snps, "Chrom"]
-			pos	    = map [snps, "Position"]
+			chrom   = data$CHR
+			pos     = data$POS
 			flagNewData = T
 		}
 		if (flagNewData==T) {
+			message (paste(tool, length(tool), length(snps), length(chrom), length(pos), length(flagNewData)))
 			dfm = data.frame (TOOL=tool, MODEL=gwasModel, CHROM=chrom, POSITION=pos, SNP=snps, 
 							  PVALUE = round (pVal,6), SCORE=round (pscores, 4), THRESHOLD=round (tscores,4), SIGNIFICANCE=signf )
 			dfm = dfm %>% distinct (SNP, .keep_all=T)
@@ -353,7 +356,6 @@ createDir <- function (newDir) {
 ## @knitr writeConfigurationParameters
 writeConfigurationParameters <- function (inputDir, outputDir) 
 {
-	msgmsg (inputDir)
 	configFile = paste0(inputDir, list.files (inputDir, pattern="config")[1])
 
 	params = config::get (file=configFile) 
