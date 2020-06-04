@@ -75,6 +75,33 @@ GWAS Paper Test Resources
 \end_layout
 
 \begin_layout Description
+Chord_diagrams:
+\end_layout
+
+\begin_layout Itemize
+Barret2010: 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Good QC should filter out artifacts, and yield a ‘manhattan plot’ like the
+ one below.
+ Each point is a SNP laid out across the human chromosomes from left to
+ right, and the heights correspond to the strength of the association to
+ disease.
+ You’ll see that the strongest associations (highlighted in green) form
+ neat peaks where nearby correlated SNPs all show the same signal.
+ Any manhattan plot with points all over the place should be viewed as highly
+ suspicious (as raised by Daniel in this excellent post).
+ 3.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
 Multiple_hypothesis_testing:
 \end_layout
 

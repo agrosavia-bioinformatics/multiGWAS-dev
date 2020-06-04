@@ -103,7 +103,7 @@ As the very nature of GWAS involves hundreds of thousands of accession-phenotype
 \begin_layout Itemize
 Kaler2019: 
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
 Determining the correct P-value threshold for statis- tical significance
@@ -111,11 +111,15 @@ Determining the correct P-value threshold for statis- tical significance
  negatives.
  To determine the statistical significance threshold in GWAS, different
  statistical procedures accounting for multiple testing have been proposed,
- including the Bonferroni correc- tion, Sidak correction, False Discovery
- Rate (FDR), per- mutation test, and Bayesian approaches.
- Bonferroni correction and FDR [11–15] are the two most com- monly used
- methods for crops limit type 1 errors (false-positives), but they almost
- cer- tainly inflate type 2 errors (false negatives) [16].
+ including the Bonferroni correction, Sidak correction, False Discovery
+ Rate (FDR), permutation test, and Bayesian approaches.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+Bonferroni correction and FDR [11–15] are the two most commonly used methods
+ for crops limit type 1 errors (false-positives), but they almost certainly
+ inflate type 2 errors (false negatives) [16].
  The Bonferroni correction method is considered the most conservative method
  for selecting a threshold P- value due to the assumption that every genetic
  variant tested is independent of the rest.
@@ -223,7 +227,7 @@ Significance_level:
 \begin_layout Itemize
 Rosyara2016: 
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
 Three different methods are available in GWASpoly for establishing a p-value
