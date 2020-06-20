@@ -1,0 +1,5 @@
+Marker	chromosome	position (bp)	And_1	And_10	And_100
+solcap_snp_c1_1	10	33993379	AAAB	AAAB	BBBB
+solcap_snp_c1_1000	9	506457	ABBB	AABB	AABB
+solcap_snp_c1_10000	7	45242018	AABB	AABB	AAAA
+solcap_snp_c1_10001	7	45239915	AAAB	AAAB	BBBB

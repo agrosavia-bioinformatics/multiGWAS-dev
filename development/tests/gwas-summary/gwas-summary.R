@@ -4,7 +4,7 @@
 # AUTHOR : Luis Garreta (lgarreta@agrosavia.co)
 # DATA   : feb/2020
 # LOG: 
-#	r4.2: "markersVennDiagrams" function writes plots
+#	r5.0: Heuristic to select best gene action model
 #	r4.1: Fixed transparency and axis error (options (bitmapType="cairo"))
 #	r4.0: Modified to work with markdown, but better to only report outputs (PNGs) to be included by markdown
 #	r3.0: Manhattan and QQ plots. Formated to create a Markdown report (not yet)
@@ -19,6 +19,14 @@ suppressMessages (library (dplyr))
 suppressMessages (library (qqman))
 suppressMessages (library (VennDiagram))
 suppressMessages (library (config))  # For read config file
+library ("RColorBrewer")             # For chord diagrams
+library(circlize)                    # For chord diagrams
+
+
+source ("lglib01.R")
+source ("gwas-heatmap.R")            # Module with functions to create summaries: tables and venn diagrams
+source ("gwas-preprocessing.R")      # Module with functions to convert between different genotype formats 
+HOME = Sys.getenv ("MULTIGWAS_HOME")
 
 options (bitmapType="cairo", width=300)
 #options(scipen=999)
@@ -37,7 +45,7 @@ main <- function () {
 	phenotypeFile = "out/filtered-gwasp4-phenotype.tbl"
 	outputDir   = "report/"
 	gwasModel    = "Full"
-	nBest = 9
+	nBest = 10
 
 	createReports (inputDir, genotypeFile, phenotypeFile, 
 				   gwasModel, outputDir, nBest)
@@ -51,48 +59,102 @@ main <- function () {
 #   4- 1 Venn diagram of significative SNPs
 #	5- 1 multiplot of 4x4 manhattan and QQ plots
 #-------------------------------------------------------------
+# Only for Manfred's data
+#-------------------------------------------------------------
+reduceSNPNames <- function (resultFiles) {
+	for (filename in resultFiles) {
+		data = read.csv (file=filename, sep="\t")
+		if (grepl ("TASSEL", filename) || grepl ("GWASpoly", filename))
+			data$Marker = gsub ("solcap_snp_","", data$Marker)
+		else
+			data [,"SNP"] = gsub ("solcap_snp_","", data$SNP)
+		#newFilename = paste0 (strsplit (filename,"[.]")[[1]][1], "-new.csv")
+		write.table (file=filename, data, sep="\t", quote=F, row.names=F)
+	}
+}
+#-------------------------------------------------------------
+#-------------------------------------------------------------
 createReports <- function (inputDir, genotypeFile, phenotypeFile, gwasModel, outputDir, nBest) 
 {
+	message ("Starting summary...")
+	# Define filenams for outputs
+	fileBestScores               = paste0(outputDir,  "/out-multiGWAS-scoresTable-best.scores")
+	fileSignificativeScores      = paste0(outputDir,  "/out-multiGWAS-scoresTable-significatives.scores")
+	fileBestVennDiagram          = paste0 (outputDir, "/out-multiGWAS-vennDiagram-best")
+	fileSignificativeVennDiagram = paste0 (outputDir, "/out-multiGWAS-vennDiagram-significatives")
+	fileManhattanPlotPNG         = paste0 (outputDir, "/out-multiGWAS-manhattanQQ-plots.png")
+	fileManhattanPlotPDF         = paste0 (outputDir, "/out-multiGWAS-manhattanQQ-plots.pdf")
+
+
 	msgmsg ("Creating reports for ", gwasModel, " model...")
 	createDir (outputDir)
 
 	msgmsg ("Writing table input config parameters...")
-	writeConfigurationParameters (inputDir, outputDir)
+	config = writeConfigurationParameters (inputDir, outputDir)
+
+	# Get filenames of results for each of the four GWAS tools
+	resultFiles =  list.files(inputDir, pattern=sprintf ("(^(tool).*(%s).*[.](csv))", gwasModel), full.names=T)
+	reduceSNPNames (resultFiles)
 
 	msgmsg ("Creating table with summary results...")
-	snpTables = markersSummaryTable (inputDir, gwasModel, nBest)
+	snpTables = markersSummaryTable (resultFiles, gwasModel, nBest)
 
 	msgmsg ("Writing table with ", nBest, " best ranked SNPs Table...")
-	outName = paste0(outputDir, "/out-multiGWAS-scoresTable-best.scores")
-	write.table (file=outName, snpTables$best, row.names=F,quote=F, sep="\t")
+	write.table (file=fileBestScores, snpTables$best, row.names=F,quote=F, sep="\t")
 
 	msgmsg ("Writing table with significative SNPs...")
-	outName = paste0(outputDir, "/out-multiGWAS-scoresTable-significatives.scores")
-	write.table (file=outName, snpTables$significatives, row.names=F,quote=F, sep="\t")
+	write.table (file=fileSignificativeScores, snpTables$significatives, row.names=F,quote=F, sep="\t")
 
 	msgmsg ("Writing Venn diagram with best SNPs...")
-	outFile = paste0 (outputDir,"/out-multiGWAS-vennDiagram-best")
-	commonBest = markersVennDiagrams (snpTables$best, gwasModel, "Best", outFile)
+	commonBest = markersVennDiagrams (snpTables$best, gwasModel, "Best", fileBestVennDiagram)
 
 	msgmsg ("Writing Venn diagram with significative SNPs...")
-	outFile = paste0 (outputDir,"/out-multiGWAS-vennDiagram-significatives")
-	commonSign = markersVennDiagrams (snpTables$significatives, gwasModel, "Significatives", outFile)
+	commonSign = markersVennDiagrams (snpTables$significatives, gwasModel, "Significatives", fileSignificativeVennDiagram)
 
 	msgmsg ("Writing Manhattan and QQ plots...")
-	png (paste0 (outputDir, "/out-multiGWAS-manhattanQQ-plots.png"), width=11, height=15, units="in", res=120)
-	op=markersManhattanPlots (inputDir, gwasModel, commonBest, commonSign, snpTables, outputDir, nBest)
+	png (fileManhattanPlotPNG, width=11, height=15, units="in", res=90)
+	op=markersManhattanPlots (resultFiles, gwasModel, commonBest, commonSign, snpTables, outputDir, nBest)
 	dev.off()
-	pdf (paste0 (outputDir, "/out-multiGWAS-manhattanQQ-plots.pdf"), width=11, height=15)
-	op=markersManhattanPlots (inputDir, gwasModel, commonBest, commonSign, snpTables, outputDir, nBest)
+
+	pdf (fileManhattanPlotPDF, width=11, height=15)
+	op=markersManhattanPlots (resultFiles, gwasModel, commonBest, commonSign, snpTables, outputDir, nBest)
 	par (op)
 	dev.off()
 
-	
-	#msgmsg ("Creating SNP heatmaps for the 4 best ranked SNPs...")
-	#genoNumericFilename = ACGTToNumericGenotypeFormat (genotypeFile)
-	#snpList = snpTables$best$SNP [1:4]
-	#createHeatmapForSNPList (outputDir, genotypeFile, genoNumericFilename, phenotypeFile, commonSign)
+
+	# Create heat maps
+	msgmsg ("Creating SNP heatmaps for the best ranked SNPs...")
+	genoNumericFilename = ACGTToNumericGenotypeFormat (genotypeFile)
+	createHeatmapForSNPList (outputDir, genotypeFile, genoNumericFilename, phenotypeFile, commonBest)
+
+	# Create chord diagrams
+	msgmsg ("Creating chord diagrams for chromosome vs SNPs...")
+	createChordDiagramSharedSNPs (fileBestScores)
+
+	# Call to rmarkdown report
+	createMarkdownReport (config)
+
 }
+
+#-------------------------------------------------------------
+# Create Rmkardown report
+#-------------------------------------------------------------
+createMarkdownReport  <- function (config) {
+	msg ("Creating html rmarkdown report...")
+	outputFile = paste0 (config$workingDir, "/multiGWAS-report.html") 
+	title      = paste0 ("MultiGWAS report for ", config$gwasModel, " GWAS model")
+
+
+	# Create html with embbeded images (using javascrips) for Java WebView
+	rmarkdown::render (paste0(HOME,"/sources/gwas-markdown.Rmd"), output_file=outputFile, output_format="html_document", 
+					   params=list (workingDir=config$workingDir, reportTitle=title, nBest=config$nBest), quiet=T)
+
+	# Create html with external images (using subfolders) for Java JEditorPane
+	#rmarkdown::render (paste0(HOME,"/sources/gwas-markdown.Rmd"), output_file=outputFile, 
+	#				   output_format="html_document", output_options=list(self_contained=F),
+	#				   params=list (workingDir=config$workingDir, reportTitle=title, nBest=config$nBest), quiet=T)
+}
+
 
 #-------------------------------------------------------------
 # Calculate the inflation factor from -log10 values
@@ -120,25 +182,19 @@ calculateInflationFactor <- function (scores)
 
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-markersManhattanPlots <- function (inputDir, gwasModel, commonBest, commonSign, snpTables, outputDir, nBest) {
-	#files =  list.files(inputDir, pattern=paste0("^(.*(",gwasModel,").*(scores)[^$]*)$"), full.names=T)
-	files =  list.files(inputDir, pattern=sprintf ("(^(tool).*(%s).*[.](csv))", gwasModel), full.names=T)
-	#pdf (paste0 (outputDir, "/out-summary.manhattan-qq-plots.pdf"), width=11, height=7)
+markersManhattanPlots <- function (resultFiles, gwasModel, commonBest, commonSign, snpTables, outputDir, nBest) {
+	#resultFiles =  list.files(inputDir, pattern=sprintf ("(^(tool).*(%s).*[.](csv))", gwasModel), full.names=T)
 	op <- par(mfrow = c(4,2), mar=c(3.5,3.5,3,1), oma=c(0,0,0,0), mgp = c(2.2,1,0))
-	for (filename in files) {
-		data           = na.omit (read.table (file=filename, header=T))
-
-		bestThresholdScore = data [nBest,c("SCORE")]
-		bestThreshold      = 10^-bestThresholdScore
-		signThresholdScore = data [1, "THRESHOLD"]
-		signThreshold      = 10^-signThresholdScore
+	for (filename in resultFiles) {
+		data           = read.table (file=filename, header=T)
+		data           = data [!is.na (data$P),]
 
 		names          = unlist (strsplit (basename (filename), "[-|.]"))
 		mainTitle      = paste0 (names[2],"-", names [3])
 
 		if (grepl ("GWASpoly", filename)) {
 			tool = "GWASpoly"
-			data = selectDataFromBestModel (data, tool)
+			data = selectBestModel (data, nBest, tool)
 			gwasResults = data.frame (SNP=data$Marker, CHR=data$Chrom, BP=data$Position, P=10^-data$SCORE)
 		}
 		else if (grepl ("SHEsis", filename)) {
@@ -151,9 +207,17 @@ markersManhattanPlots <- function (inputDir, gwasModel, commonBest, commonSign, 
 		}
 		else if (grepl ("TASSEL", filename)) {
 			tool = "TASSEL"
-			data = selectDataFromBestModel (data, nBest)
+			data = selectBestModel (data, nBest, tool)
 			gwasResults = data.frame (SNP=data$Marker, CHR=data$Chr, BP=data$Pos, P=10^-data$SCORE)
 		}
+
+		# Select limiting lines for Manhattan (best and significant)
+		bestThresholdScore = data [nBest,c("SCORE")]
+		bestThreshold      = 10^-bestThresholdScore
+		signThresholdScore = data [1, "THRESHOLD"]
+		signThreshold      = 10^-signThresholdScore
+
+		# 
 		ss = snpTables$significatives
 		if (tool %in% ss$TOOL)
 			signThresholdScore = min (ss [ss$TOOL==tool,"SCORE"])
@@ -180,50 +244,62 @@ markersManhattanPlots <- function (inputDir, gwasModel, commonBest, commonSign, 
 	return (op)
 }
 
-#------------------------------------------------------------------------
-# Return the data of the best model according to
-# number of shared SNPs and DIFF (threshold - score)
-#------------------------------------------------------------------------
-selectDataFromBestModel <- function(data, nBest) 
-{
-	dataShared = sortBySharedSNPsMultipleModels (data, nBest)
-	dataCount = add_count (dataShared, MODEL, sort=T)
+#-----------------------------------------------------------
+# Select best N SNPs from multiple action models (for GWASpoly and TASSEL)
+# Main criteria is GC
+# PLINK also can produce info of more action models using options
+#-----------------------------------------------------------
+selectBestModel <- function (data, nBest, tool) {
+	outFilename = paste0 ("report/model-scores-", tool, ".csv")
+	nBest = 50
+	# Select main columns
+	dataSNPs = data [,c("Marker","GC","MODEL","SCORE", "THRESHOLD", "DIFF")]; 
 
-	model = as.character (dataCount$MODEL[1])
+	# Order by nBest, DIFF, GC
+	orderedDataSNPs = dataSNPs [order (dataSNPs$MODEL,-dataSNPs$DIFF),]; 
 
-	dataModel = data [data[,"MODEL"] %in% model,]
+	# Reduce to groups of nBest
+	groupsDataSNPs = Reduce (rbind, by(orderedDataSNPs, orderedDataSNPs["MODEL"], head, n=nBest)); 
+
+	# Add Count of SNPs
+	summ   = data.frame (add_count (groupsDataSNPs, Marker, sort=T)); 
+	summMdl = aggregate (x=summ$n, by=list(MODEL=summ$MODEL, GC=summ$GC), 	FUN=sum)
+
+	# Calculate best model score
+	totalNs    = length (summMdl$MODEL) * nBest
+	modelScore = summMdl$x/totalNs  + 1 - abs (1-summMdl$GC)
+	summScores = cbind (summMdl, score=modelScore)
+	summScores = summScores [order (summScores$score, summScores$MODEL, decreasing=T),]
+	write.table (file=outFilename, summScores, quote=F, row.names=F, sep="\t")
+	bestModel = summScores [1, "MODEL"]
+
+	#message ("Best model is: ", bestModel)
+
+	# Select SNPs for model and sort by DIFF
+	dataModel = data [data[,"MODEL"] %in% bestModel,]
 	dataModel = dataModel [order (-dataModel$DIFF),]
 
 	return (dataModel)
 }
+
 #------------------------------------------------------------------------
 # Create Venn diagram of common markers using info from summary table
 #------------------------------------------------------------------------
 markersVennDiagrams <- function (summaryTable, gwasModel, scoresType, outFile){
 	flog.threshold(ERROR)
+	# Set lists for Venn diagrams
 	x <- list()
 	x$GWASpoly = summaryTable %>% filter (TOOL %in% "GWASpoly") %>% select (SNP) %>% .$SNP
 	x$SHEsis   = summaryTable %>% filter (TOOL %in% "SHEsis") %>% select (SNP) %>% .$SNP
 	x$PLINK    = summaryTable %>% filter (TOOL %in% "PLINK")  %>% select (SNP) %>% .$SNP
 	x$TASSEL   = summaryTable %>% filter (TOOL %in% "TASSEL") %>% select (SNP) %>% .$SNP
 
-	a = intersect (x$GWASpoly, x$SHEsis)
-	b = intersect (x$GWASpoly, x$PLINK)
-	c = intersect (x$GWASpoly, x$TASSEL)
-	d = intersect (x$SHEsis,   x$PLINK)
-	e = intersect (x$SHEsis,   x$TASSEL)
-	f = intersect (x$PLINK,    x$TASSEL)
-	#commonSNPs = intersect (intersect (x$GWASpoly, x$SHEsis), intersect(x$Plink, x$Tassel))
-	commonSNPs = union (union (a,b),union (union (c,d),union (e,f)))
-
+	# Create Venn diagram
 	mainTitle = paste0(gwasModel, "-", scoresType)
-	WIDTH  = 6
-	HEIGHT = 6
-	MAIN   = paste (WIDTH, "x", HEIGHT)
-
-	v0 <- venn.diagram(x, height=2000, width=6000, alpha = 0.4, filename = NULL, # main=mainTitle,
-						col = c("red", "blue", "green", "yellow"), cex=0.9, margin=0.0, 
-						fill = c("red", "blue", "green", "yellow")) 
+	COLORS= c("red", "blue", "yellow", "green")
+	v0 <- venn.diagram(x, height=3000, width=3000, alpha = 0.5, filename = NULL, # main=mainTitle,
+						col = COLORS, cex=1.0, cat.cex=2.0, 
+						margin=0.0, fill = COLORS)
 
 	overlaps <- calculate.overlap(x)
 	overlaps <- rev(overlaps)
@@ -234,6 +310,9 @@ markersVennDiagrams <- function (summaryTable, gwasModel, scoresType, outFile){
 		v0[[pos+8]]$label <- paste(overlaps[[i]], collapse = "\n")
  	}
 
+	WIDTH  = 11
+	HEIGHT = 12
+
  	png (paste0 (outFile,".png"), width=WIDTH, height=HEIGHT, units="in", res=120)
 	grid.draw(v0)
 	dev.off()
@@ -241,28 +320,33 @@ markersVennDiagrams <- function (summaryTable, gwasModel, scoresType, outFile){
 	grid.draw(v0)
 	dev.off()
 	
-	#grid.draw(v0)
+	# Get shared SNPs
+	dataSNPsNs     = data.frame (add_count (summaryTable, SNP, sort=T)); 
+	dataSNPsShared = dataSNPsNs[dataSNPsNs$n > 1,]
+	dataSNPsNoDups = dataSNPsShared [!duplicated (dataSNPsShared$SNP),]
+	sharedSNPs     = dataSNPsNoDups$SNP
 
-	return (commonSNPs)
+
+	return (sharedSNPs)
 }
 
 #------------------------------------------------------------------------
 # Create a summary table of best and significative markers
 #------------------------------------------------------------------------
-markersSummaryTable <- function (inputDir, gwasModel, nBest) {
-	files =  list.files(inputDir, pattern=sprintf ("(^(tool).*(%s).*[.](csv))", gwasModel), full.names=T)
+markersSummaryTable <- function (resultFiles, gwasModel, nBest) {
+	#files =  list.files(inputDir, pattern=sprintf ("(^(tool).*(%s).*[.](csv))", gwasModel), full.names=T)
 	msgmsg ("Creating summary table...")
 	summaryTable = data.frame ()
 
 	tool=""
-	for (f in files) {
+	for (f in resultFiles) {
 		data <- read.table (file=f, header=T)
 		#if (nrow(data)>nBest) data=data [1:nBest,] 
 
 		flagNewData = F
 		if (grepl("GWASpoly", f)) {
 			tool    = "GWASpoly"
-			data    = selectDataFromBestModel (data, nBest )
+			data    = selectBestModel (data, nBest, tool)
 			chrom   = data$Chrom
 			pos	    = data$Position
 			snps    = data$Marker
@@ -275,7 +359,7 @@ markersSummaryTable <- function (inputDir, gwasModel, nBest) {
 			flagNewData = T
 		}else if (grepl ("TASSEL", f)) {
 			tool    = "TASSEL"
-			data    = selectDataFromBestModel (data, nBest)
+			data    = selectBestModel (data, nBest, tool)
 			chrom   = data$Chr
 			pos		= data$Pos
 			snps    = data$Marker
@@ -313,55 +397,12 @@ markersSummaryTable <- function (inputDir, gwasModel, nBest) {
 	return (list (best=summaryTable, significatives=summarySignificatives))
 }
 
-#-----------------------------------------------------------
-# Select best N SNPs from multiple action models (for GWASpoly and TASSEL)
-# PLINK also can produce info of more action models using options
-#-----------------------------------------------------------
-sortBySharedSNPsMultipleModels <- function (scoresTable, N) {
-	# Read
-	#dr = read.table (file=filename, header=T, sep="\t"); 
-	#hd (dt,n=13)
-
-	# Select main columns
-	#dr = dt [,c("Marker","GC","MODEL","SCORE", "THRESHOLD", "DIFF")]; 
-	#hd (dr,n=13)
-	#write.table (file="xdr.tbl", dr, quote=F, sep="\t", row.names=F)
-
-	# Order by N, DIFF, GC
-	do = scoresTable [order (scoresTable$MODEL,-scoresTable$DIFF),]; 
-	#hd (do)
-	#write.table (file="xdo.tbl", do, quote=F, sep="\t", row.names=F)
-
-	# Reduce to groups of N
-	dm = Reduce (rbind, by(do, do["MODEL"], head, n=N)); 
-	#hd (dm)
-	#write.table (file="xdm.tbl", dm, quote=F, sep="\t", row.names=F)
-
-	# Add Count of SNPs
-	summ = data.frame (add_count (dm, Marker, sort=T)); 
-	#hd (summ)
-	#write.table (file="xsumm.tbl", summ, quote=F, sep="\t", row.names=F)
-
-	# Order summary by 
-	best = summ [order (-summ$n, -summ$DIFF),]; 
-	#hd (best)
-	#write.table (file="xbest.tbl", best, quote=F, sep="\t", row.names=F)
-
-	# Remove duplicates
-	#nodups = best [!duplicated (best["Marker"], fromLast=F),] ; 
-	#hd (nodups,n=15,m=20)
-	#write.table (file="xndups.tbl", nodups, quote=F, row.names=F, sep="\t")
-
-	#bestN = nodups [1:N, ]
-
-	return (best)
-}
-
 #----------------------------------------------------------
 # Util to print head of data
 # Fast head, for debug only
 #----------------------------------------------------------
-hd <- function (data, m=10,n=10) {
+hd <- function (data, m=10,n=10, tool="") {
+	filename = paste0 ("x",tool,"-", deparse (substitute (data)),".csv")
 	msgmsg (deparse (substitute (data)),": ", dim (data))
 	if (is.null (dim (data)))
 		print (data [1:10])
@@ -371,6 +412,8 @@ hd <- function (data, m=10,n=10) {
 		print (data[,1:n])
 	else 
 		print (data [1:m, 1:n])
+
+	write.table (file=filename, data, quote=F, sep="\t", row.names=F)
 }
 #-------------------------------------------------------------
 # Print a log message with the parameter
@@ -424,25 +467,110 @@ writeConfigurationParameters <- function (inputDir, outputDir)
 {
 	configFile = paste0(inputDir, list.files (inputDir, pattern="config")[1])
 
-	params = config::get (file=configFile) 
+	config = config::get (file=configFile) 
 
-	paramsDF = data.frame (PARAMETER=character(), VALUE=character ())
-	paramsDF = rbind  (paramsDF, data.frame (PARAMETER="Genotype filename", VALUE=toString (params$genotypeFile)))
-	paramsDF = rbind  (paramsDF, data.frame (PARAMETER="Phenotype filename", VALUE=toString (params$phenotypeFile)))
-	paramsDF = rbind  (paramsDF, data.frame (PARAMETER="Significance level (Genome-wide significance level)", VALUE=toString (params$significanceLevel)))
-	paramsDF = rbind  (paramsDF, data.frame (PARAMETER="Correction method (Bonferroni or FDR)", VALUE=toString (params$correctionMethod)))
-	paramsDF = rbind  (paramsDF, data.frame (PARAMETER="GWAS model (Full or Naive)", VALUE=toString (params$gwasModel)))
-	paramsDF = rbind  (paramsDF, data.frame (PARAMETER="nBest (Number of best-ranked SNPs to be reported)", VALUE=toString (params$nBest)))
-	paramsDF = rbind  (paramsDF, data.frame (PARAMETER="Filtering (TRUE or FALSE)", VALUE=toString (params$filtering)))
-	paramsDF = rbind  (paramsDF, data.frame (PARAMETER="MIND Filter (Individual with missing genotype)", VALUE=toString (params$MIND)))
-	paramsDF = rbind  (paramsDF, data.frame (PARAMETER="GENO Filter (SNPs with missing genotype)", VALUE=toString (params$GENO)))
-	paramsDF = rbind  (paramsDF, data.frame (PARAMETER="MAF Filter (Minor allele frequency)", VALUE=toString (params$MAF)))
-	paramsDF = rbind  (paramsDF, data.frame (PARAMETER="HWE Filter (Hardy-Weinberg test)", VALUE=toString (params$HWE)))
+	configDF = data.frame (PARAMETER=character(), VALUE=character ())
+	configDF = rbind  (configDF, data.frame (PARAMETER="Genotype filename", VALUE=toString (config$genotypeFile)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="Phenotype filename", VALUE=toString (config$phenotypeFile)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="Significance level (Genome-wide significance level)", VALUE=toString (config$significanceLevel)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="Correction method (Bonferroni or FDR)", VALUE=toString (config$correctionMethod)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="GWAS model (Full or Naive)", VALUE=toString (config$gwasModel)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="nBest (Number of best-ranked SNPs to be reported)", VALUE=toString (config$nBest)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="Filtering (TRUE or FALSE)", VALUE=toString (config$filtering)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="MIND Filter (Individual with missing genotype)", VALUE=toString (config$MIND)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="GENO Filter (SNPs with missing genotype)", VALUE=toString (config$GENO)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="MAF Filter (Minor allele frequency)", VALUE=toString (config$MAF)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="HWE Filter (Hardy-Weinberg test)", VALUE=toString (config$HWE)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="GWAS Tools", VALUE=toString (config$tools)))
 
 	outName = paste0(outputDir, "/out-multiGWAS-inputParameters.tbl")
-	write.table (file=outName, paramsDF, quote=F, sep="\t", row.names=F)
-	return (paramsDF)
+	write.table (file=outName, configDF, quote=F, sep="\t", row.names=F)
+	config$workingDir = getwd ()
+	return (config)
 }
+
+#-----------------------------------------------------------
+# Create a chord diagram for SNPs vs Chromosomes from
+# summary table of best scores
+#-----------------------------------------------------------
+createChordDiagramSharedSNPs <- function (scoresFile) {
+	">>>>>> get shared SNPs <<<<<<>"
+		getSharedSNPsFromFile <- function (scoresFile, N) {
+		scores = read.table (file=scoresFile, header=T, sep="\t"); 
+		summary = data.frame (add_count (scores, SNP, sort=T)); 
+		sharedDups = summary [summary$n > 1,]
+		shared = sharedDups [!duplicated (sharedDups$SNP),]
+		return (shared)
+	}
+	">>>>>> get shared SNPs <<<<<<>"
+
+	scores    = getSharedSNPsFromFile (scoresFile)
+	tbl       = scores [,c("TOOL","CHROM","SNP")]
+	tbl$CHROM = paste0 ("Chrom_", tbl$CHROM)
+
+	# Group by TOOL and select 3 SNPs for each one
+	#tblr = Reduce (rbind, by (tbl, tbl["TOOL"], head, n=2))
+	tblm = tbl [,c(2,3)]
+	chrs = sort (tblm [!duplicated (tblm [,1]), 1])
+	snps = sort (as.character (tblm [!duplicated (tblm [,2]), 2]))
+
+	# Create matrix Chroms X SNPs
+	nChrs   = length (chrs)
+	nSNPs   = length (snps)
+	mat = as.data.frame (matrix (rep (0,nChrs*nSNPs),nrow=nChrs, ncol=nSNPs), stringAsFactor=F )
+	rownames (mat) = chrs
+	colnames (mat) = snps
+
+	# Fill the matrix
+
+	dmat = as.data.frame (mat)
+	for (i in 1:nrow (tblm)) {
+		chr = as.character (tblm [i, 1])
+		snp = as.character (tblm [i, 2])
+		dmat [chr,snp] = dmat [chr,snp] + 1
+	}
+
+
+
+	dmat = as.matrix (dmat) 
+
+	# Set colors 
+	colorsChrs = setNames (brewer.pal (n=nChrs+3, name="RdBu"), c(chrs, "chXX", "chYY", "chZZ"))
+	colorsSNPs = setNames (rep ("grey", nSNPs), snps)
+	grid.col = c(colorsChrs, colorsSNPs)
+
+	# PDF
+	outFile = paste0(strsplit (scoresFile, split="[.]")[[1]][1], "-chordDiagram.pdf")
+	pdf (file=outFile, width=7, height=7)
+	chordDiagram(dmat, annotationTrack = "grid", directional = -1, direction.type = c("arrows"), # c("diffHeight", "arrows"),
+				 #link.arr.type = "big.arrow", 
+				 grid.col = grid.col,
+				 preAllocateTracks = list(track.height = max(strwidth(unlist(dimnames(dmat))))))
+
+	# we go back to the first track and customize sector labels
+	circos.track(track.index = 1, panel.fun = function(x, y) {
+			circos.text(CELL_META$xcenter, CELL_META$ylim[1], CELL_META$sector.index, 
+			facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5))
+	}, bg.border = NA) # here set bg.border to NA is important
+	dev.off()
+
+	#PNG
+	outFile = paste0(strsplit (scoresFile, split="[.]")[[1]][1], "-chordDiagram.png")
+	png (file=outFile, width=5, height=5	, units="in", res=90)
+	chordDiagram(dmat, annotationTrack = "grid", directional = -1, direction.type = c("arrows"), # c("diffHeight", "arrows"),
+				 #link.arr.type = "big.arrow", 
+				 grid.col = grid.col,
+				 preAllocateTracks = list(track.height = max(strwidth(unlist(dimnames(dmat))))))
+
+	# we go back to the first track and customize sector labels
+	circos.track(track.index = 1, panel.fun = function(x, y) {
+			circos.text(CELL_META$xcenter, CELL_META$ylim[1], CELL_META$sector.index, 
+			facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5))
+	}, bg.border = NA) # here set bg.border to NA is important
+	dev.off()
+}
+
+
 #-------------------------------------------------------------
 # Get alternate allele from a row of alleles
 #-------------------------------------------------------------

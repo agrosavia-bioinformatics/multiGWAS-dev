@@ -2031,50 +2031,6 @@ By default, MultiGWAS uses the Bonferroni correction in which the significance
 
  is equal to the number of test performed in each model, which is different
  between models.
- 
-\end_layout
-
-\begin_layout Subsubsection
-Selection of significant and best-ranked associations
-\end_layout
-
-\begin_layout Standard
-After corrections, significant associations are selected as the ones with
- 
-\emph on
-p-values
-\emph default
- falling below a significant threshold, which is calculated for each GWAS
- package.
- But, as described above, it is equally important to know the best-ranked
- associations, closer to being statistically significant, as they may represent
- important associations to consider for posterior analysis.
- 
-\end_layout
-
-\begin_layout Standard
-In the case of GWAS packages with only one gene action model (PLINK and
- SHESIS), the best-ranked associations are selected from the top 
-\emph on
-N
-\emph default
- identified by the package.
- But, in the case of GWAS packages with several gene action models (GWASpoly
- and TASSEL), the best-ranked associations are selected as the top 
-\emph on
-N
-\emph default
- from the 
-\begin_inset Quotes eld
-\end_inset
-
-best action model
-\begin_inset Quotes erd
-\end_inset
-
-, the one with more shared SNP associations, in other words, from the action
- model that identifies more associations that are also identified in the
- other models.
 \end_layout
 
 \begin_layout Standard
@@ -2091,6 +2047,134 @@ color{black}
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsubsection
+Selection of significant and best-ranked associations
+\end_layout
+
+\begin_layout Standard
+MultiGWAS selects two groups of associations from the results of each GWAS
+ package: statistically significant and best-ranked.
+ The latter equally important to the former as they are associations with
+ lowest 
+\emph on
+p-values
+\emph default
+ not reaching the significance threshold but representing interesting associatio
+ns for further analysis (possible false negatives).
+ 
+\end_layout
+
+\begin_layout Standard
+The significant associations are selected from the ones with 
+\emph on
+p-values
+\emph default
+ falling below a significant threshold, calculated for each GWAS package;
+ and the best-ranked associations as the 
+\emph on
+N
+\emph default
+ ones closer to being statistically significant, with N defined by the user
+ in the configuration file.
+\end_layout
+
+\begin_layout Standard
+The selection of these groups takes into account whether the GWAS package
+ uses only one gene action model, as PLINK and SHEsis do, or uses several
+ ones, as GWASpoly and TASSEL do.
+ In the first case, there is only one resulting set of associations and
+ the selection is straighforward, as described above.
+ However, in the second case, there are several resulting sets of associations
+ (one for each model), and MultiGWAS takes the significant and best-ranked
+ associations from the best gene action model.
+ Action models are scored taking into account the number of shared SNPs
+ between models and the inflation factor, with the following equation:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+score(M_{i})=\frac{\sum\limits _{all\,models}{\textstyle SharedSNPs(M_{i})}}{\sum\limits _{all\,models}MaxSharedSNPs}+1-\mid1-\lambda(M_{i})\mid
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $M_{i}$
+\end_inset
+
+ is the gene action model 
+\begin_inset Formula $i$
+\end_inset
+
+, with 
+\begin_inset Formula $i$
+\end_inset
+
+ from 
+\begin_inset Formula $1..n$
+\end_inset
+
+, for a GWAS package with 
+\begin_inset Formula $n$
+\end_inset
+
+ gene action models; 
+\begin_inset Formula $SharedSNPs(M_{i})$
+\end_inset
+
+ is the number of SNPs identified at once in both the model 
+\begin_inset Formula $M_{i}$
+\end_inset
+
+ and the other models (shared SNPs); 
+\begin_inset Formula $MaxSharedSNPs$
+\end_inset
+
+ is the max number of shared SNPs by each model; and 
+\begin_inset Formula $\lambda(M_{i})$
+\end_inset
+
+ is the inflation factor for the model 
+\begin_inset Formula $M_{i}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The score is high when a model 
+\begin_inset Formula $M_{i}$
+\end_inset
+
+ both identifies a high number of shared SNPs and has an inflation factor
+ 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ close to 1.
+ Conversely, the score is low when the model 
+\begin_inset Formula $M_{i}$
+\end_inset
+
+ both identifies a small number of shared SNPs and has an inflation factor
+ 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ either low (close to 0) or high (
+\begin_inset Formula $\lambda>2$
+\end_inset
+
+ ).
+ In any other case, the score is balanced between the number of shared SNPs
+ and the inflation factor.
 \end_layout
 
 \begin_layout Subsubsection
@@ -3524,6 +3608,19 @@ name "fig:MultiGWAS-interaction"
 \end_inset
 
 
+\end_layout
+
+\begin_layout Section
+Discusssion
+\end_layout
+
+\begin_layout Enumerate
+For GWAS packages using several gene action models (e.g.
+ GWASpoly and TASSEL), MultiGWAS automatically selects one of them to perform
+ the integration with the others GWAS packages.
+ This selection takes into account two parameters: the replicability and
+ the inflation factor of each gene action model as at it was shown using
+ different action model
 \end_layout
 
 \begin_layout Standard

@@ -4,7 +4,7 @@
 # AUTHOR : Luis Garreta (lgarreta@agrosavia.co)
 # DATA   : feb/2020
 # LOG: 
-#	r4.2: "markersVennDiagrams" function writes plots
+#	r5.0: Heuristic to select best gene action model
 #	r4.1: Fixed transparency and axis error (options (bitmapType="cairo"))
 #	r4.0: Modified to work with markdown, but better to only report outputs (PNGs) to be included by markdown
 #	r3.0: Manhattan and QQ plots. Formated to create a Markdown report (not yet)
@@ -14,9 +14,7 @@
 #	r0.8: Create venn diagrams, summary table of first Ns"
 #     
 
-
-HOME = Sys.getenv ("MULTIGWAS_HOME")
-.libPaths (paste0(HOME, "/opt/Rlibs"))
+source ("lglib01.R")
 
 suppressMessages (library (dplyr))
 suppressMessages (library (qqman))
@@ -24,8 +22,8 @@ suppressMessages (library (VennDiagram))
 suppressMessages (library (config))  # For read config file
 
 
-#source ("gwas-heatmap.R")            # Module with functions to create summaries: tables and venn diagrams
-#source ("gwas-preprocessing.R")      # Module with functions to convert between different genotype formats 
+source ("gwas-heatmap.R")            # Module with functions to create summaries: tables and venn diagrams
+source ("gwas-preprocessing.R")      # Module with functions to convert between different genotype formats 
 
 options (bitmapType="cairo", width=300)
 #options(scipen=999)
@@ -48,7 +46,6 @@ main <- function () {
 
 	createReports (inputDir, genotypeFile, phenotypeFile, 
 				   gwasModel, outputDir, nBest)
-warnings ()
 }
 
 #-------------------------------------------------------------
@@ -124,8 +121,8 @@ createReports <- function (inputDir, genotypeFile, phenotypeFile, gwasModel, out
 	
 	# Create heat maps
 	msgmsg ("Creating SNP heatmaps for the best ranked SNPs...")
-	#genoNumericFilename = ACGTToNumericGenotypeFormat (genotypeFile)
-	#createHeatmapForSNPList (outputDir, genotypeFile, genoNumericFilename, phenotypeFile, commonBest)
+	genoNumericFilename = ACGTToNumericGenotypeFormat (genotypeFile)
+	createHeatmapForSNPList (outputDir, genotypeFile, genoNumericFilename, phenotypeFile, commonBest)
 }
 #-------------------------------------------------------------
 # Calculate the inflation factor from -log10 values
@@ -221,6 +218,7 @@ markersManhattanPlots <- function (resultFiles, gwasModel, commonBest, commonSig
 # PLINK also can produce info of more action models using options
 #-----------------------------------------------------------
 selectBestModel <- function (data, nBest, tool) {
+	outFilename = paste0 ("report/model-scores-", tool, ".csv")
 	nBest = 50
 	# Select main columns
 	dr = data [,c("Marker","GC","MODEL","SCORE", "THRESHOLD", "DIFF")]; 
@@ -240,6 +238,7 @@ selectBestModel <- function (data, nBest, tool) {
 	modelScore = summMdl$x/totalNs  + 1 - abs (1-summMdl$GC)
 	summScores = cbind (summMdl, score=modelScore)
 	summScores = summScores [order (summScores$score, summScores$MODEL, decreasing=T),]
+	write.table (file=outFilename, summScores, quote=F, row.names=F, sep="\t")
 	bestModel = summScores [1, "MODEL"]
 
 	#message ("Best model is: ", bestModel)
@@ -267,9 +266,8 @@ markersVennDiagrams <- function (summaryTable, gwasModel, scoresType, outFile){
 	mainTitle = paste0(gwasModel, "-", scoresType)
 	COLORS= c("red", "blue", "yellow", "green")
 	v0 <- venn.diagram(x, height=3000, width=3000, alpha = 0.5, filename = NULL, # main=mainTitle,
-						col = COLORS, cex=1.5, cat.cex=2.0,
-						margin=0.0,
-						fill = COLORS)
+						col = COLORS, cex=1.0, cat.cex=2.0, 
+						margin=0.0, fill = COLORS)
 
 	overlaps <- calculate.overlap(x)
 	overlaps <- rev(overlaps)
@@ -451,6 +449,7 @@ writeConfigurationParameters <- function (inputDir, outputDir)
 	paramsDF = rbind  (paramsDF, data.frame (PARAMETER="GENO Filter (SNPs with missing genotype)", VALUE=toString (params$GENO)))
 	paramsDF = rbind  (paramsDF, data.frame (PARAMETER="MAF Filter (Minor allele frequency)", VALUE=toString (params$MAF)))
 	paramsDF = rbind  (paramsDF, data.frame (PARAMETER="HWE Filter (Hardy-Weinberg test)", VALUE=toString (params$HWE)))
+	paramsDF = rbind  (paramsDF, data.frame (PARAMETER="GWAS Tools", VALUE=toString (params$tools)))
 
 	outName = paste0(outputDir, "/out-multiGWAS-inputParameters.tbl")
 	write.table (file=outName, paramsDF, quote=F, sep="\t", row.names=F)

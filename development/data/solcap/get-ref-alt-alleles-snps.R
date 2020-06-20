@@ -32,7 +32,7 @@ BBBB     = paste0 (alt,alt,alt,alt)
 
 
 out = cbind (snp=ids, ref=ref, alt=alt, AA=AA, AB=AB, BB=BB, AAAA=AAAA, AAAB=AAAB, AABB=AABB, ABBB=ABBB, BBBB=BBBB)
-outFilename = sprintf ("%s-ref-alt-snps.tbl", name)
-write.table (file=outFilename, out, quote=F, row.names=F, sep="\t")
+outFilename = sprintf ("%s-ref-alt-snps.csv", name)
+write.csv (file=outFilename, out, quote=F, row.names=F)
 
 
