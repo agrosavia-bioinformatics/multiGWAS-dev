@@ -13,7 +13,9 @@ createModelsReport <- function (tool) {
 	i = 1
 	for (f in files) {
 		print (f)
-		df = read.csv (f)
+		dfUnsorted = read.csv (f)
+		df = dfUnsorted [order (dfUnsorted$MODEL,decreasing=T),]
+
 		if (i==1) {
 			print (unlist (dfSumm$MODEL))
 			dfSumm = data.frame (MODEL=df$MODEL, df$score)
@@ -37,6 +39,7 @@ createModelsReport <- function (tool) {
 		
 		N = nrow (dfSumm)
 		COLORS = brewer.pal (n=N, name="RdBu")
+		#COLORS <- colorRampPalette(c("blue", "green", "red"))(n = N)
 		mat = as.matrix (dfSumm [,-1])
 		barplot (mat, beside=T, col=COLORS, 
 				 main=paste0(tool, " models ", " trait total_yield"), ylab="Scores", xlab="Samples")

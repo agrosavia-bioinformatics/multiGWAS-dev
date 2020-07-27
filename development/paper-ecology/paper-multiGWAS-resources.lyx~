@@ -27,7 +27,17 @@
 \bibtex_command default
 \index_command default
 \paperfontsize default
-\use_hyperref false
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
 \papersize default
 \use_geometry false
 \use_package amsmath 1
@@ -74,8 +84,67 @@
 GWAS Paper Test Resources
 \end_layout
 
+\begin_layout Standard
+\begin_inset CommandInset index_print
+LatexCommand printindex
+type "idx"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+Chord_diagrams:
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+Chord_diagrams:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Barret2010: 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Good QC should filter out artifacts, and yield a ‘manhattan plot’ like the
+ one below.
+ Each point is a SNP laid out across the human chromosomes from left to
+ right, and the heights correspond to the strength of the association to
+ disease.
+ You’ll see that the strongest associations (highlighted in green) form
+ neat peaks where nearby correlated SNPs all show the same signal.
+ Any manhattan plot with points all over the place should be viewed as highly
+ suspicious (as raised by Daniel in this excellent post).
+ 3.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
 \begin_layout Description
 Multiple_hypothesis_testing:
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+Multiple_hypothesis_testing
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -103,7 +172,7 @@ As the very nature of GWAS involves hundreds of thousands of accession-phenotype
 \begin_layout Itemize
 Kaler2019: 
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 Determining the correct P-value threshold for statis- tical significance
@@ -136,9 +205,20 @@ Bonferroni correction and FDR [11–15] are the two most commonly used methods
 
 \end_deeper
 \begin_layout Description
-Inflation_factor: 
+Inflation_factor:
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+Inflation_factor:
 \end_layout
 
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
 \begin_layout Itemize
 
 \series bold
@@ -219,15 +299,26 @@ However, a calculation of the lambda value (λ; also known as the genomic
 
 \end_layout
 
+\end_deeper
 \begin_layout Description
 Significance_level:
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+Significance_level:
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
 Rosyara2016: 
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 Three different methods are available in GWASpoly for establishing a p-value
@@ -291,7 +382,7 @@ ism may cause many variants with small real effects to be overlooked.
 \begin_layout Itemize
 Pearson2008: 
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 The GWA approach is revolutionary because it permits interrogation of the
@@ -313,7 +404,7 @@ The GWA approach is revolutionary because it permits interrogation of the
 \begin_layout Itemize
 Gumpinger2018:
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 In a traditional (univariate) genome-wide association study, a measure of
@@ -340,14 +431,17 @@ In a traditional (univariate) genome-wide association study, a measure of
 
 \end_deeper
 \begin_layout Description
-Threshold
-\begin_inset CommandInset label
-LatexCommand label
-name "Threshold:"
+Threshold:
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+Threshold:
+\end_layout
 
 \end_inset
 
-: 
+ 
 \end_layout
 
 \begin_deeper
@@ -439,6 +533,16 @@ However, there has been some criticism of this threshold, with a 2012 study
 \end_deeper
 \begin_layout Description
 Low_pvalues:
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+Low_pvalues:
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -446,7 +550,7 @@ Low_pvalues:
 https://www.researchgate.net/post/How_do_I_adjust_the_p_value_of_SNPs-phenotype_as
 sociation_study_for_multiple_testing:
 \begin_inset Note Comment
-status open
+status collapsed
 
 \begin_layout Plain Layout
 Don't adjust the p values.
@@ -509,6 +613,16 @@ As a consequence, the testing paradigm is unhelpful and it is better to
 \end_deeper
 \begin_layout Description
 GWAS_models:
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+GWAS_models:
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -603,6 +717,16 @@ Association analysis was conducted with Tassel 5 software (Bradbury et al.,
 \end_deeper
 \begin_layout Description
 Input_formats:
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+Input_formats:
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -694,6 +818,16 @@ Plink is a whole genome association analysis tool set, which comes with
 \end_deeper
 \begin_layout Description
 Output_results:
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+Output_results
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -720,6 +854,26 @@ Display results are presented uniformly with the same array of information
 \end_deeper
 \begin_layout Description
 Allele_dosage:
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+Gene action models
+\end_layout
+
+\end_inset
+
+
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+Allele_dosage
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -740,8 +894,9 @@ We use the term marker “dosage” to denote the minor allele count of a marker
 \end_layout
 
 \begin_layout Itemize
+Zhao2016
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
 Classically, there are three genotypic test models, i.e.
@@ -763,12 +918,20 @@ ce in the studies of complex disease genes.
 
 \end_layout
 
-\end_deeper
 \begin_layout Description
 Contributions:
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+Contributions
 \end_layout
 
-\begin_deeper
+\end_inset
+
+
+\end_layout
+
 \begin_layout Itemize
 Grimm2017:
 \begin_inset Note Note
@@ -1313,7 +1476,7 @@ The Q-Q plot is used to assess the number and magnitude of observed associations
 \begin_layout Itemize
 
 \series bold
-Powel2016:
+Power2016:
 \series default
  
 \begin_inset Note Note

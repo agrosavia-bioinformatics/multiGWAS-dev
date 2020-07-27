@@ -22,6 +22,11 @@
 \usepackage[font=scriptsize,labelfont=bf]{caption}
 
 %\pagecolor{yellow!30}
+\usepackage[colorinlistoftodos]{todonotes}
+\setlength{\marginparwidth}{4.3cm}
+\newcommand{\lc}[1]{\todo[size=\small,color=red!20!white]{#1}}
+\newcommand{\ic}[1]{\todo[size=\small,color=green!20!white]{#1}}
+\newcommand{\pr}[1]{\todo[size=\small,color=blue!20!white]{#1}}
 \end_preamble
 \use_default_options true
 \maintain_unincluded_children false
@@ -103,13 +108,7 @@
 
 \begin_layout Title
 MultiGWAS: A tool for GWAS analysis on tetraploid organisms by integrating
- 
-\change_deleted -1666014648 1589332472
-the results of 
-\change_inserted -1666014648 1589332472
--
-\change_unchanged
-four GWAS software
+ four GWAS software
 \end_layout
 
 \begin_layout Abstract
@@ -213,247 +212,378 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-%Ya está modificada la intro para incluir diferentes especies de plantas
- poliploides.
- Faltan las citas.
- Estoy haciendo una lista de referencias que hay que leer con calma.
- Especialmente reviews.
- Intentaré en los próximos días ampliarhttps://www.overleaf.com/project/5e8b8de6ae
-23ed0001a9a14f este primer párrafo conforme vaya leyendo las referencias
- que bajé.
- Pero el sentido general creo que ya quedó establecido.
- Att.
- Ivania 
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 The 
-\change_deleted -1666014648 1589337717
-GWAS (
-\change_unchanged
-Genome-Wide Association Stud
-\change_inserted -1666014648 1589337773
-ies (GWAS)
-\change_deleted -1666014648 1589337776
-y)
-\change_unchanged
- is used to identify which variants through the whole genome of a large
- number of individuals are associated with a specific trait (CITES).
- This methodology started with humans and several model plants, such as
- rice, maize, and 
-\begin_inset Formula $Arabidopsis$
-\end_inset
-
- 
+\color blue
+Genome-wide association studies (GWAS) are
+\color inherit
+ used to identify which variants through the whole genome of a large number
+ of individuals are associated with a specific trait (
 \begin_inset CommandInset citation
 LatexCommand cite
-key "tian2011genome, korte2013advantages"
+key "cantor2010prioritizing, begum2012comprehensive"
 
 \end_inset
 
-.
- 
-\color red
-Because 
-\color inherit
-of the advances in the next-gen sequencing technology and the decreasing
- of the sequencing cost in recent years, there is an increase in genome
- sequences in non-model organisms at a faster rate 
+).
+ This methodology started with humans and several model plants, such as
+ rice, maize, and 
+\emph on
+Arabidopsis
+\emph default
+ (
+\begin_inset CommandInset citation
+LatexCommand cite
+key "lauc2010genomics, tian2011genome, cao2011whole, korte2013advantages, han2013sequencing"
+
+\end_inset
+
+).
+ Because of the advances in the next-gen sequencing technology and the decline
+ of the sequencing cost in recent years, there is an increase in the availabilit
+y of genome sequences of different organisms at a faster rate (
 \begin_inset CommandInset citation
 LatexCommand cite
 key "ekblom2011applications, ellegren2014genome"
 
 \end_inset
 
-.
+).
+ Thus, the GWAS is becoming the standard tool to understand the genetic
+ bases of either ecological or economic phenotypic variation for both model
+ and non-model organisms.
+ This increment in GWAS includes complex species such as polyploids (Fig.
  
-\color red
-Therefore
-\color inherit
-, several research projects pursue, for the first time, the genetic bases
- of an ecological or economic phenotypic variation through GWAS analysis
- for non-model wild plants and crops that often are polyploids 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "GWASpolyploids"
+
+\end_inset
+
+) (
 \begin_inset CommandInset citation
 LatexCommand cite
 key "ekblom2011applications, santure2018wild"
 
 \end_inset
 
-.
+).
 \end_layout
 
 \begin_layout Standard
-The GWAS for polyploid species has three related challenges.
-\change_inserted -1666014648 1589387573
-
-\begin_inset Note Comment
-status open
+\begin_inset ERT
+status collapsed
 
 \begin_layout Plain Layout
 
-\change_inserted -1666014648 1589387639
-Me parece muy amplio este frase de los 
-\emph on
-challeges
-\change_unchanged
+% Figure timelines articles
+\end_layout
+
+\begin_layout Plain Layout
 
 \end_layout
 
 \end_inset
 
 
-\change_unchanged
- First, as all GWAS analyses, we should replicate the study as a reliable
- method to validate the results and recognize real associations.
- This replication involves finding the same associations either in an independen
-t population sample under the same software or using an independent technology
- using the same population sample 
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/paper-GWASpolyploids-PubMed.pdf
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Timeline for articles reported for GWAS studies on polyploid species in
+ PubMed.
+ We present data for completed years.
+\begin_inset CommandInset label
+LatexCommand label
+name "GWASpolyploids"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The GWAS for polyploid species has three related challenges.
+ First, as all GWAS, we should replicate the study as a reliable method
+ to validate the results and recognize real associations.
+ This replication involves finding the same associations either in several
+ replicates from the study population using the 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+lc
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Me confunde al hablar de software y tools
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ same software or testing different GWAS tools among the same study population.
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+lc
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+"The latter approach..."
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ This approach involved the use of different parameters, models, or conditions,
+ to test how consistent the results are (
 \begin_inset CommandInset citation
 LatexCommand cite
 key "De2014,Pearson2008"
 
 \end_inset
 
-.
- Both approaches 
-\change_deleted -1666014648 1589338431
-involved
-\change_inserted -1666014648 1589338435
- involve
-\change_unchanged
- the use of different parameters, models, or conditions, to test how consistent
- the results are.
+).
+ However, the performance of different 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+lc
 \end_layout
 
-\begin_layout Standard
-Second, although there are many GWAS 
-\change_deleted -1666014648 1589338459
-software
-\change_inserted -1666014648 1589338461
-packages
-\change_unchanged
- available to repeat the analysis under different conditions 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Gumpinger2018"
-
 \end_inset
 
-, most of them are designed exclusively for the diploid 
-\color red
-data matrix
-\color inherit
- 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Bourke2018"
 
-\end_inset
+\begin_inset ERT
+status collapsed
 
-.
- Therefore, it is often necessary to "diploidizing" the polyploid genomic
- data in order to replicate the analysis.
+\begin_layout Plain Layout
+
+{
 \end_layout
 
-\begin_layout Standard
-Third, the performance of different GWAS software could affect the results.
- However, there are few tools focused in the integration of the GWAS software
- outputs to make comparisons under different parameters and conditions.
- For example, comparing four packages for diploid species (i.e., PLINK, TASSEL,
- GAPIT, and FaST-LMM) using different sample sizes for plant data found
- that the threshold 
-\begin_inset Formula $Pvalue$
 \end_inset
 
- for SNP significance change for each package 
+Software or tools ??
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+GWAS software could affect the results.
+ For example, the threshold 
+\begin_inset Formula $pvalue$
+\end_inset
+
+ for SNP significance change through four GWAS software (i.e., PLINK, TASSEL,
+ GAPIT, and FaST-LMM) when sample size varies (
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Yan2019"
 
 \end_inset
 
-.
+).
  It means that well-ranked SNPs from one package can be ranked differently
- in another, causing difficulty in selecting the most credible associations
- when results from each package are analyzed separately.
- Besides, the software iPAT facilitates the use of three popular command-line
- GWAS packages GAPIT, PLINK, and FarmCPU 
+ in another.
+\end_layout
+
+\begin_layout Standard
+Second, although there are many GWAS software available to repeat the analysis
+ under different conditions (
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gumpinger2018"
+
+\end_inset
+
+), most of them are designed exclusively for the diploid data matrix (
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bourke2018"
+
+\end_inset
+
+).
+ Therefore, it is often necessary to "diploidizing" the polyploid genomic
+ data in order to replicate the analysis.
+\end_layout
+
+\begin_layout Standard
+Third, there are very few tools focused on the integration of several GWAS
+ software, to make comparisons under different parameters and conditions
+ across them.
+ As far as we know, there is only two software with this service in mind,
+ such as iPAT and easyGWAS.
+\end_layout
+
+\begin_layout Standard
+The iPAT allows running in a graphic interface three well-known command-line
+ GWAS software such as GAPIT, PLINK, and FarmCPU (
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Zhang2018"
 
 \end_inset
 
-.
- However, results from the execution of each package are separated.
- Therefore, the problem of interpreting and selecting the best associations
- persists.
- In comparison, the easyGWAS cloud platform, perform, share, and compare
- the results of GWAS 
+) .
+ However, the output from each package is separated.
+ On the other hand, the easyGWAS allows running a GWAS analysis on the web
+ using different algorithms.
+ This analysis could run independently of both the computer capacity and
+ operating system.
+ However, it needs either several datasets available or a dataset with a
+ large number of individuals to make replicates in order to compare among
+ algorithms.
+ Moreover, the output from different algorithms is separated (
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Grimm2017"
 
 \end_inset
 
-.
- This platform offers two types of analysis: the first is an intersection
- analysis that searches associations that were found significant in more
- than one dataset.
- The second is a meta-analysis that searches associations mutually supported
- by several datasets.
- Both types are based on different datasets with the same GWAS parameters
- to confirm or search for new associations.
- The limitation of this approach is when the data set is unique or has a
- small sample of individuals.
+).
+ Thus, for both software iPAT and easyGWAS, the integrative and comparative
+ outputs among software or algorithms are missing.
 \end_layout
 
 \begin_layout Standard
-To solve all the three challenges above, we developed the MultiGWAS tool
- that performs GWAS analyses for tetraploid species using four software
- in parallel.
- Our tool include GWASpoly 
+
+\color red
+To solve all the three challenges above, 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+lc{To solve the above three challenges?}
+\end_layout
+
+\end_inset
+
+
+\color inherit
+ we developed the MultiGWAS tool that performs GWAS analyses for tetraploid
+ species using four software in parallel.
+ Our tool include GWASpoly (
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Rosyara2016"
 
 \end_inset
 
- and the SHEsis tool 
+) and the SHEsis tool (
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Shen2016"
 
 \end_inset
 
- that accept polyploid genomic data, and PLINK 
+) that accept polyploid genomic data, and PLINK (
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Purcell2007"
 
 \end_inset
 
- and TASSEL 
+) and TASSEL (
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Bradbury2007"
 
 \end_inset
 
- with the use of a "diploidized" genomic matrix.
- The tool deals with preprocessing data, running four GWAS tools in parallel,
- and create reports that compare the results and help the user decide more
- intuitively the true or false associations.
+) with the use of a "diploidized" genomic matrix.
+ The tool deals with 
+\color blue
+input file formats, data preprocessing, search for associations by running
+\color inherit
+ four GWAS tools in parallel, and 
+\color blue
+creation of
+\color inherit
+ comparative reports from the output of each software to help the user to
+ decide more intuitively the true or false associations.
 \end_layout
 
 \begin_layout Section
@@ -462,7 +592,7 @@ Methods
 
 \begin_layout Standard
 The MultiGWAS tool has three main consecutive steps: the adjustment, the
- multi analysis, and finally, the integration (Fig.
+ multi analysis, and the integration (Fig.
  
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -509,8 +639,9 @@ sideways false
 status open
 
 \begin_layout Plain Layout
+\align center
 \begin_inset Graphics
-	filename images/multiGWAS-flowchart-stages.pdf
+	filename images/paper-multiGWAS-flowchart-stages.pdf
 	width 12cm
 
 \end_inset
@@ -519,9 +650,17 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
+
+\series bold
 MultiGWAS flowchart has three steps: adjustment, multi analysis, and integration.
+
+\series default
  The first step deals with input data management, reading the configuration
- file and preprocessing the input genomic data (genotype and phenotype).
+ file, 
+\color blue
+reading and preprocessing the input genomic data
+\color inherit
+ (genotype and phenotype).
  The second step deals with GWAS analysis, configuring and running the four
  packages in parallel.
  And the third step deals with summarizing and reporting results using different
@@ -578,6 +717,13 @@ status open
 
 \begin_layout Subsubsection
 Reading configuration file
+\begin_inset CommandInset label
+LatexCommand label
+name "section-Reading-configuration-file"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -599,22 +745,62 @@ status collapsed
 \end_layout
 
 \begin_layout Paragraph
-Input genotype and phenotype files:
+
+\color blue
+Ploidy:
 \end_layout
 
 \begin_layout Standard
-Currently, MultiGWAS uses two input files, one for genotype and the other
- for the phenotype.
- Both data correspond to data matrices with column and row names (Figure
+
+\color blue
+Numerical value for the ploidy level of the genotype, currently MultiGWAS
+ supports diploids and tetraploids genotypes (2: for diploids, 4: for tetraploid
+s).
+\end_layout
+
+\begin_layout Paragraph
+
+\color blue
+Genotype and phenotype input files:
+\end_layout
+
+\begin_layout Standard
+
+\color blue
+MultiGWAS uses two input files, one for genotype and one for phenotype.
+ Genotypes files can be either in GWASpoly format (
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Rosyara2016"
+
+\end_inset
+
+) using SNP markers in rows and samples in columns (Fig.
  
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:File-Formats"
+
+\end_inset
+
+.a) or Variant Call Format (VCF) (Fig.
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:File-Formats"
+
+\end_inset
+
+.b) which is transformed into GWASpoly format using NGSEP 4.0.2 (
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Duitama2019"
 
 \end_inset
 
 ).
- The genotype file uses SNP markers in rows and samples in columns (Figure
+ The phenotype file contains only one trait and uses a matrix format with
+ the first column for the sample names and the second column for the trait
+ values (Fig.
  
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -622,48 +808,7 @@ reference "fig:File-Formats"
 
 \end_inset
 
-a).
- The phenotype file uses samples in rows and traits in columns (Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:File-Formats"
-
-\end_inset
-
-b) with the first column corresponding to the sample name and the second
- column to trait value.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-%Paula: Luis una pregunta, recibimos solo formato ACGT? o recibimos otro
- formato?? 
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-% R/ Actualmente solo formato GWASpoly (dos archivos), se podrÃ­a facilmente
- formato nÃºmerido, dos archivos (ClusterCall) con o sin info de mapa (CHROM,
- POSITION), y tal vez formato PLINK (tres archivos).
-\end_layout
-
-\end_inset
-
-
+.c).
 \end_layout
 
 \begin_layout Standard
@@ -671,247 +816,12 @@ status collapsed
 placement H
 wide false
 sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Box Frameless
-position "t"
-hor_pos "c"
-has_inner_box 1
-inner_pos "t"
-use_parbox 0
-use_makebox 0
-width "60col%"
-special "none"
-height "1in"
-height_special "totalheight"
-thickness "0.4pt"
-separation "3pt"
-shadowsize "4pt"
-framecolor "black"
-backgroundcolor "none"
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Box Boxed
-position "t"
-hor_pos "c"
-has_inner_box 1
-inner_pos "t"
-use_parbox 0
-use_makebox 0
-width "99col%"
-special "none"
-height "1in"
-height_special "totalheight"
-thickness "0.4pt"
-separation "3pt"
-shadowsize "4pt"
-framecolor "black"
-backgroundcolor "none"
-status open
-
-\begin_layout Plain Layout
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-scriptsize
-\end_layout
-
-\end_inset
-
-
-\family typewriter
-Marker,Chrom,Pos,Indiv01,Indiv02,Indiv03,...
-\end_layout
-
-\begin_layout Plain Layout
-
-\family typewriter
-c2_41437,0,805179,AAAG,AAGG,AAGG,...
-\end_layout
-
-\begin_layout Plain Layout
-
-\family typewriter
-c2_24258,0,1252430,AAGG,AGGG,GGGG,...
-\end_layout
-
-\begin_layout Plain Layout
-
-\family typewriter
-c2_21332,0,3499519,TTCC,TTCC,TTCC,...
- 
-\end_layout
-
-\begin_layout Plain Layout
-
-\family typewriter
-...
-\end_layout
-
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
-a
-\end_layout
-
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset Box Frameless
-position "t"
-hor_pos "c"
-has_inner_box 1
-inner_pos "t"
-use_parbox 0
-use_makebox 0
-width "30col%"
-special "none"
-height "1in"
-height_special "totalheight"
-thickness "0.4pt"
-separation "3pt"
-shadowsize "4pt"
-framecolor "black"
-backgroundcolor "none"
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Box Boxed
-position "t"
-hor_pos "c"
-has_inner_box 1
-inner_pos "t"
-use_parbox 0
-use_makebox 0
-width "99col%"
-special "none"
-height "1in"
-height_special "totalheight"
-thickness "0.4pt"
-separation "3pt"
-shadowsize "4pt"
-framecolor "black"
-backgroundcolor "none"
-status open
-
-\begin_layout Plain Layout
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-scriptsize
-\end_layout
-
-\end_inset
-
-
-\family typewriter
-Individual,Traitname
-\end_layout
-
-\begin_layout Plain Layout
-
-\family typewriter
-Indiv01, 3.59
-\end_layout
-
-\begin_layout Plain Layout
-
-\family typewriter
-Indiv02, 4.07
-\end_layout
-
-\begin_layout Plain Layout
-
-\family typewriter
-Indiv03, 1.05
-\end_layout
-
-\begin_layout Plain Layout
-
-\family typewriter
-...
-\end_layout
-
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
-b
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename images/tmp-tables-file-formats.png
-
-\end_inset
-
-
-\end_layout
+	filename images/paper-input-files.pdf
 
 \end_inset
 
@@ -936,11 +846,60 @@ scriptsize
 
  
 \series bold
-MultiGWAS genotype and phenotype formats
+\color blue
+Examples of MultiGWAS input file formats
 \series default
 .
- Both files are in CSV format (Comma Separated Values) and contain as first
- row the header labels of the columns.
+ Figures a and b show genotype files in GWASpoly and VCF formats, respectively,
+ while figure c shows a phenotype file in matrix format.
+ a.
+ Genotype file in GWASpoly format containing column headers and with the
+ first three columns for markers names, chromosomes and positions.
+ The following columns correspond to the marker data of the samples in "ACGT"
+ format (e.g.
+ AAGG, CCTT for tetraploids, AG, CT for diploids).
+ b.
+ Genotype file in VCF format with metadata (first two lines) and header
+ line.
+ The following lines contain genotype information of the samples for each
+ position.
+ VCF marker data can be encoded as simple genotype calls (GT format field,
+ e.g.
+ 0/0/1/1 for tetraploids or 0/1 for diploids) or using the NGSEP custom
+ format fields (
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Duitama2019"
+
+\end_inset
+
+): ACN, ADP or BSDP.
+ c.
+ Phenotype file in matrix format with column headers and sample names followed
+ by their trait values.
+ Both GWASpoly genotype and phenotype files are in CSV (Comma Separated
+ Values) format.).
+
+\color inherit
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:File-Formats"
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Default formats for genotype and phenotype are in GWASpoly formats, with
+ both files in CSV format (Comma Separated Values) containing as first row
+ the header labels of the columns.
  Although the header labels are arbitrary, the column order is obligatory.
  
 \series bold
@@ -996,117 +955,11 @@ Traitname
 \end_inset
 
  are the column names for the individual and trait names, respectively.
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:File-Formats"
-
-\end_inset
-
-
 \end_layout
 
 \end_inset
 
 
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Itemize
-
-\size footnotesize
-In the first stage, inputs are read from a configuration file (see below)
- and the genotype and phenotype are cleaned and filtered using the quality
- control (QC) filters.
- 
-\end_layout
-
-\begin_layout Itemize
-
-\size footnotesize
-However, each tool has its own way of doing things: different user interfaces
- (GUI or command line based), different input formats (phenotype and genotype
- formats)
-\end_layout
-
-\begin_layout Itemize
-
-\size footnotesize
-Then, the filtered genotype and phenotype are transformed to the specific
- formats required for each tool.
- 
-\end_layout
-
-\begin_layout Itemize
-
-\size footnotesize
-The used format of the phenotype and genotype are the same as the the GWASpoly
- software (Rosyara et al., 2016), except that the phenotype file must include
- only one trait without covariates.
- For the genotype file, the first three column correspond to the marker
- name, chromosome number, and position in the chromosome; while the next
- columns contain the marker data for each individual in the population codified
- in the ”ACGT” format (e.g.
- AATT, CCGG, AAAT, GGCG).
- For the phenotype file, the first column contains the individual name,
- and the second contains the trait value.
- 
-\end_layout
-
-\begin_layout Itemize
-
-\size footnotesize
-Chen2018:
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Input file formats are automatically converted to the formats corresponding
- to the specified CLI packages.
- iPat uses the first three lines of each input file to determine the formats.
- Acceptable geno-type formats include hapmap, numerical, VCF, PLINK and
- BLINK.
- Phenotype formats are acceptable with or without individual identi-fication.
- When input data formats match the chosen CLI package format requirements,
- analyses are conducted directly.
- Otherwise, format conversion is performed first.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-
-\size footnotesize
-GWASpoly2016:
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-The first column of the phenotype file contains the genotype identifier,
- columns 2 through (n.traits + 1) contain trait values, and subsequent columns
- contain the levels (for factors) or numeric values (for covariates) of
- any fixed effects.
- The first three columns of the genotype file are (1) marker name, (2) chromosom
-e, and (3) position.
- Subsequent columns contain the marker data for each individual in the populatio
-n.
- Marker data can be coded in one of three formats: • "numeric" = markers
- are coded based on the dosage of the alternate allele, taking on integer
- values between 0 and ploidy (fractional values not allowed) • "AB" format
- (e.g., AAAB, ABBB for tetraploids) • "ACGT" format (e.g., AAAT, GGCC for tetraploid
-s) Only bi-allelic markers are allowed.
- Missing marker data will be imputed with the population mode (most frequent
- value) for each marker.
 \end_layout
 
 \end_inset
@@ -1599,6 +1452,20 @@ key "Gumpinger2018"
 \end_inset
 
  for the other three filters: MIND, GENO, and HWE.
+\end_layout
+
+\begin_layout Paragraph
+
+\color blue
+GWAS tools:
+\end_layout
+
+\begin_layout Standard
+
+\color blue
+List of names of GWAS packages to run and integrate into MultiGWAS analysis.
+ Currently four packages, two for tetraploid organisms: GWASpoly and SHEsis,
+ and two for diploids: PLINK and TASSEL.
  
 \end_layout
 
@@ -1627,7 +1494,7 @@ At this point, the format "ACGT" suitable for the polyploid software GWASpoly
 
 \begin_layout Standard
 After this process, the genomic data, genotype and phenotype, are converted
- to the specific formats required for each of the four GWAS packages.
+ to the specific formats required for each of the four GWAS packages.r
 \end_layout
 
 \begin_layout Subsection
@@ -2072,12 +1939,15 @@ The significant associations are selected from the ones with
 p-values
 \emph default
  falling below a significant threshold, calculated for each GWAS package;
- and the best-ranked associations as the 
+ and the best-ranked associations are selected as the closest 
 \emph on
 N
 \emph default
- ones closer to being statistically significant, with N defined by the user
- in the configuration file.
+ to being statistically significant, with 
+\emph on
+N
+\emph default
+ defined by the user in the configuration file.
 \end_layout
 
 \begin_layout Standard
@@ -2086,17 +1956,16 @@ The selection of these groups takes into account whether the GWAS package
  ones, as GWASpoly and TASSEL do.
  In the first case, there is only one resulting set of associations and
  the selection is straighforward, as described above.
- However, in the second case, there are several resulting sets of associations
- (one for each model), and MultiGWAS takes the significant and best-ranked
- associations from the best gene action model.
- Action models are scored taking into account the number of shared SNPs
- between models and the inflation factor, with the following equation:
+ However, in the second case, there are several resulting sets of associations,
+ one for each model, and MultiGWAS selects both groups of associations by
+ choosing the gene action model with the highest number of shared SNPs and
+ with the inflation factor closest to one, according to the following equation:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \[
-score(M_{i})=\frac{\sum\limits _{all\,models}{\textstyle SharedSNPs(M_{i})}}{\sum\limits _{all\,models}MaxSharedSNPs}+1-\mid1-\lambda(M_{i})\mid
+score(M_{i})=\frac{\sum\limits _{j=1}^{k}{\textstyle sharedSNPs(M_{i},M_{j})}}{k*N}+1-|1-\lambda(M_{i})|
 \]
 
 \end_inset
@@ -2106,11 +1975,11 @@ score(M_{i})=\frac{\sum\limits _{all\,models}{\textstyle SharedSNPs(M_{i})}}{\su
 
 \begin_layout Standard
 where 
-\begin_inset Formula $M_{i}$
+\begin_inset Formula $score(M_{i})$
 \end_inset
 
- is the gene action model 
-\begin_inset Formula $i$
+ is the score for the gene action model 
+\begin_inset Formula $M_{i}$
 \end_inset
 
 , with 
@@ -2118,26 +1987,31 @@ where
 \end_inset
 
  from 
-\begin_inset Formula $1..n$
+\begin_inset Formula $1..k$
 \end_inset
 
 , for a GWAS package with 
-\begin_inset Formula $n$
+\begin_inset Formula $k$
 \end_inset
 
  gene action models; 
-\begin_inset Formula $SharedSNPs(M_{i})$
+\begin_inset Formula $sharedSNPs(M_{i},M_{j})$
 \end_inset
 
- is the number of SNPs identified at once in both the model 
+ is the number of shared SNPs between models 
 \begin_inset Formula $M_{i}$
 \end_inset
 
- and the other models (shared SNPs); 
-\begin_inset Formula $MaxSharedSNPs$
+ and 
+\begin_inset Formula $M_{j}$
 \end_inset
 
- is the max number of shared SNPs by each model; and 
+; 
+\begin_inset Formula $N$
+\end_inset
+
+ is the number of closest SNPs to being statistically significant, as it
+ was described above; and 
 \begin_inset Formula $\lambda(M_{i})$
 \end_inset
 
@@ -2199,7 +2073,7 @@ status open
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
@@ -2309,7 +2183,8 @@ At this stage,
 \color blue
 MultiGWAS integrates
 \color inherit
- the results to evaluate reproducible results among tools (Fig 
+ the results to evaluate reproducible results among tools (Fig.
+ 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Reports"
@@ -2353,17 +2228,10 @@ ive SNPs provided by each tool and (2) the set of all the best-ranked SNPs.
 \end_layout
 
 \begin_layout Standard
-For each SNP 
-\color blue
-identified
-\color inherit
- more than once, we provide what we call the SNP profile.
+For each SNP identified more than once, we provide what we call the SNP
+ profile.
  That is a heat diagram for a specific SNP, where each column is a genotype
- state AAAA, AAAB, AABB, ABBB, 
-\color blue
-and
-\color inherit
- BBBB.
+ state AAAA, AAAB, AABB, ABBB, and BBBB.
  And each row corresponds to a sample.
  Samples with close genotypes form together clusters.
  Thus to generate the clusters, we do not use the phenotype information.
@@ -2377,10 +2245,26 @@ and
 MultiGWAS generates a report, one document with the content previously described.
  Besides, there is a folder with the individual figures just in case the
  user needs one.
- In the supplementary information, we include a report and a description
- of the report content
-\color red
- (supplementary information XXX)
+ 
+\color blue
+In the supplementary information, we include a report and a description
+ of the report content (Supplementary Material 1)
+\end_layout
+
+\begin_layout Standard
+
+\color blue
+In the following section, we present the results of the functionality of
+ the tool applied on a diversity panel of a tetraploid potato, genotyped
+ and phenotyped as part of the USDA-NIFA Solanaceae Coordinated Agricultural
+ Project (SolCAP) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Hirsch2013"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -2389,8 +2273,10 @@ status open
 
 \begin_layout Plain Layout
 
-%PAula: infomraciOn suplementary con reporte completo y figuras.
- Y explicaciOn del reporte
+
+\backslash
+pr{infomraciOn suplementary con reporte completo y figuras.
+ Y explicaciOn del reporte}
 \end_layout
 
 \end_inset
@@ -2399,8 +2285,39 @@ status open
 \end_layout
 
 \begin_layout Standard
-In the following section, we present the results applied to a public dataset.
- 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+As an example of the functionality of the tool, here we show the outputs
+ reported by MultiGWAS in the tetraploid potato diversity panel, genotyped
+ and phenotyped as part of the USDA-NIFA Solanaceae Coordinated Agricultural
+ Project (SolCAP) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Hirsch2013"
+
+\end_inset
+
+.
+ The complete report from MultiGWAS for the naive and full model is in the
+ Supplementary information (
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://github.com/agrosavia-bioinformatics/multiGWAS
+\end_layout
+
+\end_inset
+
+) 
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -2456,30 +2373,25 @@ Score tables to show detailed information of associations for both summary
 \end_layout
 
 \begin_layout Standard
-As an example of the functionality of the tool, here we show the outputs
- reported by MultiGWAS in the tetraploid potato diversity panel, genotyped
- and phenotyped as part of the USDA-NIFA Solanaceae Coordinated Agricultural
- Project (SolCAP) 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Hirsch2013"
 
+\color blue
+The complete reports generated by MultiGWAS are shown in the supplementary
+ information at
+\begin_inset space ~
 \end_inset
 
-.
- The complete report from MultiGWAS for the naive and full model is in the
- Supplementary information (
+ 
 \begin_inset Flex URL
 status open
 
 \begin_layout Plain Layout
 
-https://github.com/agrosavia-bioinformatics/multiGWAS
+https://github.com/agrosavia-bioinformatics/multiGWAS-Supplementary
 \end_layout
 
 \end_inset
 
-) 
+.
 \end_layout
 
 \begin_layout Standard
@@ -2543,16 +2455,14 @@ Manhattan and QQ plots for GWAS associations
 
 \begin_layout Standard
 MultiGWAS uses classical Manhattan and Quantile–Quantile plots (QQ plots)
- to visualize the results of GWAS analysis from each package.
- In both plots, SNPs are represented by dots and their 
-\emph on
-p-values
-\emph default
- are transformed to scores as 
+ to visualize the results of each package.
+ In both plots, the points are the SNPs and their p-values are transformed
+ into scores like 
 \begin_inset Formula $-log_{10}(\mathB{p-values})$
 \end_inset
 
- (see Figure 
+ (see Fig.
+ 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:view-qqmanhattan"
@@ -2560,41 +2470,133 @@ reference "fig:view-qqmanhattan"
 \end_inset
 
 ).
- The Manhattan plot displays the SNP association strength (y-axis) distributed
- in their genomic location (x-axis), so the higher the score the stronger
- the association.
- Whereas the QQ plot is used to visually compare the expected distribution
- of 
+ The Manhattan plot shows the strength of association of the SNPs (y-axis)
+ distributed at their genomic location (x-axis), so the higher the score,
+ the stronger the association.
+ While the QQ plot compares the expected distribution of 
 \emph on
-p-values 
+p-values
 \emph default
-(y-axis) vs.
- the observed distribution (x-axis), so under the null hypothesis of no
- association of SNPs with the phenotype, both distributions should coincide,
- and most SNPs should lie on a diagonal line.
+ (y-axis) with the observed distribution (x-axis)..
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+lc{Corregido: "among packages" y cita de polygenic traits}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+ic{Revisar si esto del color verde es correcto "shared among all packages".
+ También revisar si está bien dicho lo de la comparación entre pocos genes
+ y muchos genes.
+ No se si sea necesario cuantificar la desviación.
+ Originalmente se cuantificaba pero era confuso}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+lc{Ya está}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+ic{La leyenda debe incluir también la descripción de qué significa las lineas
+ rojas, azules y los puntos verdes}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-MultiGWAS adds special marks to the Manhattan and QQ plots to help identify
- different types of SNPs: (a) In Manhattan plots, significant SNPs are above
- a red line, best-ranked SNPs are above a blue line, and shared SNPs (See
- Figure 
+MultiGWAS adds distinctive marks to both plots to identify different types
+ of SNPs: (a) In the Manhattan plots, the significant SNPs are above a red
+ line and the best-ranked SNPs are above a blue line.
+ In addition, 
+\color blue
+SNPS shared between packages are colored green
+\color inherit
+ (See Fig.
+ 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Table-Shared-SNPs"
 
 \end_inset
 
-.b) are colored in green (b) In QQ plots, a red diagonal line indicates the
- expectation, so potential associations can be observed when the number
- of SNPs deviating from the diagonal is small, as in the case of monogenic
- traits, or when this number is somewhat higher, as in the case of truly
- polygenic traits.
- However, deviations for a high number of SNPs could reflect inflated 
+.b).
+ (b) In the QQ plots, a red diagonal line indicates the expected distribution
+ under the null hypothesis of no association of SNPs with the phenotype,
+ both distributions should coincide, and most SNPs should lie on the diagonal
+ line.
+ 
+\color blue
+Deviations for a large number of SNPs may reflect inflated 
+\emph on
+p-values 
+\emph default
+due to population structure or cryptic relatedness.
+ But, it is also expected that few SNPs deviate from the diagonal for a
+ truly polygenetic trait (
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Power2016"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Thus, for monogenic traits, potential associations occur when few SNPs show
+ a deviation from the diagonal.
+ In comparison, in the case of polygenic traits, possible associations occur
+ when a high number of SNPs deviate from the diagonal.
+ However, deviations for a high number of SNPs could reflect also inflated
+ 
 \emph on
 p-values 
 \emph default
 owing to population structure or cryptic relatedness.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2602,38 +2604,12 @@ owing to population structure or cryptic relatedness.
 placement H
 wide false
 sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\begin_inset Box Frameless
-position "t"
-hor_pos "c"
-has_inner_box 1
-inner_pos "t"
-use_parbox 0
-use_makebox 0
-width "100col%"
-special "none"
-height "1in"
-height_special "totalheight"
-thickness "0.4pt"
-separation "3pt"
-shadowsize "4pt"
-framecolor "black"
-backgroundcolor "none"
 status open
 
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
 	filename images/paper-manhattan-QQ-plots.pdf
-	lyxscale 50
-
-\end_inset
-
-
-\end_layout
 
 \end_inset
 
@@ -2646,17 +2622,41 @@ status open
 \begin_layout Plain Layout
 
 \series bold
-MultiGWAS visualization of associations.
+\color blue
+Associations in the tetraploid potato dataset.
 
 \series default
- MultiGWAS creates Manhattan and QQ plots for GWAS results of each GWAS
- packages.
- Here we show the plots for one tetraploid package, GWASpoly (a), and other
- diploid package, PLINK (b).
+ MultiGWAS shows the associations identified by the four GWAS packages using
+ Manhattan and QQ plots.
+ In the case of the tetraploid potato, several SNPs are observed to be shared
+ between the four packs (green dots).
+ The best-ranked SNPs are above the blue line, but only GWASpoly and SHEsis
+ identified significant associations (SNPs above the red line).
+ However, the inflation factor given by SHEsis is too high (
+\begin_inset Formula $\lambda=3.5$
+\end_inset
+
+, at the top of the QQ plot), which is observed by the high number of SNPs
+ deviating from the red diagonal of the QQ plot.
  
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:view-qqmanhattan"
+
+\end_inset
+
+
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+
+\color blue
+In QQ plots, the genomic inflation factor is shown at the top of the plots.
+ In Manhattan plots, best-ranked SNPs are above the blue line whereas signficant
+ SNPs are above the red line, and shared SNPs among packages are shown as
+ green dots.
+\end_layout
 
 \end_inset
 
@@ -2751,7 +2751,7 @@ reference "fig:Table-Shared-SNPs"
 placement H
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
@@ -3343,10 +3343,10 @@ including the parameters that drive the GWAS process.
 
 \end_inset
 
-The execution of the CLI tool is simple, it only needs to open a linux console,
- change to the folder where the configuration file was created, and type
- the name of the executable tool followed by the filename of the configuration
- file, like this:
+The execution of the CLI tool is simple.
+ It only needs to open a Linux console, change to the folder where the configura
+tion file was created, and type the name of the executable tool followed
+ by the the filename of the configuration file, like this:
 \end_layout
 
 \begin_layout Standard
@@ -3366,9 +3366,9 @@ multiGWAS Test01.config
 \end_layout
 
 \begin_layout Standard
-Then, the tool starts the execution, showing information of the process
- in the console window, and when it finishes the results are saved to a
- new subfolder called 
+Then, the tool starts the execution, showing information on the process
+ in the console window.
+ When it finishes, the results are in a new subfolder called 
 \emph on
 
 \begin_inset Quotes eld
@@ -3377,11 +3377,63 @@ Then, the tool starts the execution, showing information of the process
 out-Test01
 \emph default
 .
- Results include a full html report containing the different views described
- in the results section, along with the original graphics and summary tables
- created by MultiGWAS and used to create the html report.
- Additionally, results include the preprocessed tables of the main outputs
- generated by the four GWAS packages used by MultiGWAS.
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+lc
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Cambié 
+\begin_inset Quotes eld
+\end_inset
+
+origina graphics
+\begin_inset Quotes erd
+\end_inset
+
+ por 
+\begin_inset Quotes eld
+\end_inset
+
+source graphics
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\color blue
+ The results include a complete HTML report containing the different views
+ described in the results section, the source graphics and tables that support
+ the report, and the preprocessed tables from the results generated by the
+ four GWAS packages used by MultiGWAS.
 \end_layout
 
 \begin_layout Subsection
@@ -3389,8 +3441,31 @@ Using the graphical user interface
 \end_layout
 
 \begin_layout Standard
-The MultiGWAS GUI can be executed by calling from a linux console the following
- command:
+
+\color blue
+The interface allows users to save, load or specify the different input
+ parameters for MultiGWAS in a friendly way (Fig.
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:MultiGWAS-interaction"
+
+\end_inset
+
+).
+ The input parameters correspond to the settings included in the configuration
+ file described in the subsection 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "section-Reading-configuration-file"
+
+\end_inset
+
+.
+
+\color inherit
+ The interface can be executed by calling the following command from a linux
+ console:
 \end_layout
 
 \begin_layout Standard
@@ -3407,104 +3482,6 @@ jmultiGWAS
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-After it opens, it shows a main frame with a tool bar at left and four tabs
- at the top (Figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:MultiGWAS-interaction"
-
-\end_inset
-
-).
- From the tool bar, users can select the GWAS packages to use in the analysis–tw
-o for tetraploids and two for diploids–, and start the analysis with the
- current parameters (or with parameters from a previous configuration).
- And, from the tabs, users can input the MultiGWAS parameters, and view
- the process and results of the analysis.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-\begin_inset Quotes eld
-\end_inset
-
-Inputs
-\begin_inset Quotes erd
-\end_inset
-
-, 
-\begin_inset Quotes eld
-\end_inset
-
-Outputs
-\begin_inset Quotes erd
-\end_inset
-
-, 
-\begin_inset Quotes eld
-\end_inset
-
-Results
-\begin_inset Quotes erd
-\end_inset
-
-, and 
-\begin_inset Quotes eld
-\end_inset
-
-Files
-\begin_inset Quotes erd
-\end_inset
-
-.
- The 
-\begin_inset Quotes eld
-\end_inset
-
-Inputs
-\begin_inset Quotes erd
-\end_inset
-
- tab shows the form to create the configuration file and run the application.
- The 
-\begin_inset Quotes eld
-\end_inset
-
-Outputs
-\begin_inset Quotes erd
-\end_inset
-
- tab shows the messages from the running process after it starts the execution.
- The 
-\begin_inset Quotes eld
-\end_inset
-
-Results
-\begin_inset Quotes erd
-\end_inset
-
- tab shows the full html report described above.
- And the 
-\begin_inset Quotes eld
-\end_inset
-
-Files
-\begin_inset Quotes erd
-\end_inset
-
- tab shows an embbeded file browser pointing to the subfolder that contains
- the original files used in the html report and described above
-\end_layout
-
-\end_inset
-
-.
 \end_layout
 
 \begin_layout Standard
@@ -3530,66 +3507,22 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-scriptsize
-\end_layout
-
-\end_inset
-
 
 \series bold
-MultiGWAS GUI application
+\color blue
+Main view of the MultiGWAS graphical user interface.
+
 \series default
-.
- Main view of the MultiGWAS GUI application (
-\begin_inset Quotes eld
-\end_inset
-
-Inputs
-\begin_inset Quotes erd
-\end_inset
-
- view) where users can create the configuration file by setting values for
- input parameters.
- The GUI contains other three views: 
-\begin_inset Quotes eld
-\end_inset
-
-Outputs
-\begin_inset Quotes erd
-\end_inset
-
- view shows the logs of the running process.
- 
-\begin_inset Quotes eld
-\end_inset
-
-Results
-\begin_inset Quotes erd
-\end_inset
-
- view shows a report in html format with the tabular and graphics described
- in the results section.
- And, the 
-\begin_inset Quotes eld
-\end_inset
-
-Files
-\begin_inset Quotes erd
-\end_inset
-
- view shows an embedded file manager pointing to the subfolder that contains
- the files created by MultiGWAS and used to create the report.
- 
-\begin_inset Newline newline
-\end_inset
-
+ The interface shows a main view on the center, a toolbar on the left and
+ four tabs on top.
+ From the main view, users can specify the input parameters for the analysis.
+ From the toolbar, users can select the GWAS packages to be used in the
+ analysis (two for tetraploids and two for diploids), and start the analysis
+ with the current parameters (or load a previously saved configuration).
+ And, from the tabs, in addition to specifying the input parameters, users
+ can view the outputs of the process, the results of the analysis as an
+ html report, and browse the source files that support the report.
+\color inherit
 
 \begin_inset CommandInset label
 LatexCommand label
@@ -3597,7 +3530,7 @@ name "fig:MultiGWAS-interaction"
 
 \end_inset
 
-
+ 
 \end_layout
 
 \end_inset
@@ -3611,7 +3544,252 @@ name "fig:MultiGWAS-interaction"
 \end_layout
 
 \begin_layout Section
-Discusssion
+Discussion
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%PAULA: Falta discutir un tris los resultados a nivel de información
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%PAULA: Tools diploides vs Tools poliploides en poliploides - dosis de los
+ alelos
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+XXXXXXXXXXXXXXXXXXXXXXX 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%Paula Consideraciones para polyploides que afectan multiGWAS requieren
+ estudios
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%polyploides allele frequencies (alllele copy number).
+ A way to solve is considering that each allele in partial heterozygotes
+ has an equal likekihood of being present in more tahn one copy
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+% HW polyploides autopolyploides tengo dudas si se cumple - porque la segregació
+n es diferente
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Challenges studying polyploid organisms are related to the complexity of
+ (1) the data, and (2) inheritance mechanisms that are under study (
+\begin_inset CommandInset citation
+LatexCommand cite
+key "dufresne2014"
+
+\end_inset
+
+).
+ The difficulties regarding the data complexity are the uncertainty in the
+ allele dosage and null alleles, but these problems are opportunities to
+ improve software at the variant calling stage.
+ Moreover, there is an on-going understanding of the inheritance mechanisms
+ for polyploids.
+ For autopolyploids, most loci have a polysomic inheritance.
+ However, sections of the genome that did not duplicate lead to disomic
+ inheritance for some loci (
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ohno1970,lynch2000,dufresne2014"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+MultiGWAS does not face the problem of the allele dosage uncertainty.
+ It is necessary to measure the impact of the allele dosage uncertainty
+ at the GWAS stage to understand the effects arisen from this problem at
+ the association stage.
+ However, MultiGWAS addresses the second challenge variation of inheritance
+ mechanisms by using different for existing software: two designed for polysomic
+ inheritance (
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Rosyara2016,Shen2016"
+
+\end_inset
+
+) together with two for disomic inheritance (
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Purcell2007,Bradbury2007"
+
+\end_inset
+
+).
+ Thus it is a useful tool for researchers because it looks for significative
+ associations that involve both types of inheritance.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%selección del modelo adecuado para cada tool - %Paula: Para polyploides
+ el modo de inheritance es complejo por eso una selección del tool basada
+ en replicabilidad y el factor de inflación es una propuesta justificada
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+pr
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Luis esta parte revisala por fa.
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ Moreover, GWASpoly (
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Rosyara2016"
+
+\end_inset
+
+) offers models for different types of polyploid gene action additive, diploidiz
+ed additive, duplex dominant, simplex dominant, and general.
+ On the other hand, TASSEL (
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bradbury2007"
+
+\end_inset
+
+) also models different types of gene action for diploids general, additive
+ and dominant.
+ We propose an automatic selection of the gene action model for both tools
+ based on a balance between the factor of inflation and the replicability
+ of the identified SNPs.
+ We inform the user of the selected model based on the automatic strategy;
+ we consider this information helps to understand the gene action model
+ for the trait of interest.
+ Even though the main focus is on the resultant SNPs, the model has assumptions
+ that reflect the gene actions for a specific phenotype.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%PAULA: ventaja de integrar - pvalores inflados de shesis  (Balance entre
+ sensitividad y especificidad al integrar)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+Replicability is a strategy to assess results derived from different methods.
+ MultiGWAS integrates results to check for replicability in the results
+ from different software.
+ By combining results, we can compare the outputs and look for coincidences.
+ Some software are more sensible, and others are more specific, but the
+ integration allows MultiGWAS to balance specificity and sensitivity.
+\end_layout
+
+\begin_layout Standard
+We provide the user with different graphic outputs to help to interpret
+ the results.
+ We report the SNP profile for the SNPs identified by more than one software.
+ The SNP profile gives the researcher visual feedback from the SNP.
+ We previously check for significative SNPs based on the p-value; however,
+ it is essential to go back to the data and check if the SNP is a real associati
+on between the genotype and phenotype.
+ For this purpose, we designed the SNP profile.
+ 
+\end_layout
+
+\begin_layout Section
+Discussion
 \end_layout
 
 \begin_layout Enumerate
@@ -3621,6 +3799,17 @@ For GWAS packages using several gene action models (e.g.
  This selection takes into account two parameters: the replicability and
  the inflation factor of each gene action model as at it was shown using
  different action model
+\end_layout
+
+\begin_layout Enumerate
+Muchos de los rasgos de interés en las plantas están asociados tanto a múltiples
+ genes, 
+\end_layout
+
+\begin_layout Enumerate
+Cuando las herramientas diploides y tetraploides en conjunto asocian un
+ mismo marcador al rasgo de interés entonces esa asociación necesitó solo
+ de la información diploide.
 \end_layout
 
 \begin_layout Standard
