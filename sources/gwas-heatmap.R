@@ -8,68 +8,71 @@ suppressMessages (library (gplots))
 # Main
 #----------------------------------------------------------
 main <- function () {
+	library ("parallel")
 	args = commandArgs (trailingOnly=T)
 
-	genoFileACGT <- "geno-ACGT.csv"
-	genoFileNUM  <- "geno-NUM.csv"
-	phenoFile    <- "pheno.csv"
-	snpList      <- c ("c1_8019", "c2_21314")         # SNPs a visualizar
-	createHeatmapForSNPList ("./",genoFileACGT, genoFileNUM, phenoFile, snpList) 
+	genoFileACGT <- "out/filtered-gwasp4-genotype.tbl"
+	genoFileNUM  <- "out/filtered-gwasp4-genotype-NUM.tbl"
+	phenoFile    <- "out/filtered-gwasp4-phenotype.tbl"
+	snpList      <- c("c2_51250","c1_7770", "c1_2978")
+	ploidy       <- 4
+	createHeatmapForSNPList ("./",genoFileACGT, genoFileNUM, phenoFile, snpList, ploidy) 
 }
 
 #----------------------------------------------------------
 # create SNP profiles for a list of SNPS
 #----------------------------------------------------------
-createHeatmapForSNPList <- function (outputDir, genoFileACGT, genoFileNUM, phenoFile, snpList) {
-	#msg ("Genotype ACGT : ", genoFileACGT)
-	#msg ("Genotype NUM  : ", genoFileNUM)
-	#msg ("Phenotype     : ", phenoFile)
-	#message ("SNPs:         : ", snpList)
-
+createHeatmapForSNPList <- function (outputDir, genoFileACGT, genoFileNUM, phenoFile, snpList, ploidy) {
 	outName = paste0 (outputDir, "/out-SNPProfile") 
+
+	genotypeACGT    <- read.csv (genoFileACGT, na.strings = "NA", dec = ".", strip.white = TRUE, check.names=F )
+	genotypeNUMERIC <- read.csv (genoFileNUM,  na.strings = "NA", dec = ".", strip.white = TRUE, check.names=F)
+	phenotype       <- read.csv (phenoFile,    na.strings = "NA", dec = ".", strip.white = TRUE, check.names=F)
 
 	pdfHeatMap <- function (snp) {
 		message  ("    >>>> Heatmap for snp: ", snp)
-		createHeatmapForSNP (outputDir, genoFileACGT, genoFileNUM, phenoFile, snp)
+		createHeatmapForSNP (outputDir, genotypeACGT, genotypeNUMERIC, phenotype, snp, ploidy)
 	}
 
+	# Not works in parallel
 	NCORES = detectCores ()
-	for (s in snpList)
-		pdfHeatMap (s)
-	#res=mclapply (snpList, pdfHeatMap, mc.cores=NCORES)
+	for (i in snpList) 
+		pdfHeatMap (i)
+	#res=mclapply (snpList, pdfHeatMap, mc.cores=1)
 }
 
 #----------------------------------------------------------
 # create a SNP profile for a snpId
 #----------------------------------------------------------
-createHeatmapForSNP <- function (outputDir, genoFileACGT, genoFileNUM, phenoFile, snpId) {
-	genotypeACGT    <- read.table(genoFileACGT, header = TRUE, sep = ",", na.strings = "NA", dec = ".", strip.white = TRUE, check.names=F )
-	genotypeNUMERIC <- read.table(genoFileNUM, header = TRUE, sep = ",", na.strings = "NA", dec = ".", strip.white = TRUE, check.names=F)
-	phenotype       <- read.table(phenoFile, header = TRUE, sep = ",", na.strings = "NA", dec = ".", strip.white = TRUE, check.names=F)
+createHeatmapForSNP <- function (outputDir, genotypeACGT, genotypeNUMERIC, phenotype, snpId, ploidy) {
 
+	# Get names and values for phenotype
 	phenoNames  = phenotype [,1]
 	phenoValues = phenotype [,2]
-	trait = colnames (phenotype) [2]
+	trait       = colnames (phenotype) [2]
 
+	# Get samples for marker in both matrices: Numeric and ACGT
+	samplesMarker          = t(genotypeNUMERIC[genotypeNUMERIC[,1]==snpId,])
+	samplesMarkerMatrixNUM = as.matrix(samplesMarker[-1:-3,])
 
-	#marker=t(genotypeNUMERIC[genotypeNUMERIC$Marker==snpId,])
-	marker=t(genotypeNUMERIC[genotypeNUMERIC[,1]==snpId,])
-	marker_2<-as.matrix(marker[-1:-3,])
-	head(marker_2)
-	alphabet_AA<-c("0","1","2","3","4")
+	samplesMarker           = t(genotypeACGT[genotypeACGT[,1]==snpId,])
+	samplesMarkerMatrixACGT = as.matrix(samplesMarker[-1:-3,])
 
+	# Count genotype types
 	one.hot<-function(sqnce, alphabet){
 	  y<-unlist(strsplit(sqnce,""))
 	  sapply(y,function(x){match(alphabet,x,nomatch=0)})
 	}
 
-	a <- marker_2
-	c <- t(one.hot(a, alphabet = alphabet_AA))
-	names(c)<-names(marker_2)
-	e<-as.data.frame(c,row.names = marker_2[1,])
-	e$Name<-row.names(marker_2)
-	genoxfeno_2<-subset(e,e$Name%in%phenoNames)
-	genoxfeno_3<-genoxfeno_2[,1:5]*phenoValues
+	alphabet_AA = as.character (0:ploidy)
+
+	c           <- t(one.hot (samplesMarkerMatrixNUM, alphabet = alphabet_AA))
+	names(c)    <- names(samplesMarkerMatrixNUM)
+	e           <- as.data.frame(c,row.names = samplesMarkerMatrixNUM[1,])
+	e$Name      <- row.names(samplesMarkerMatrixNUM)
+	genoxfeno_2 <- subset(e,e$Name%in%phenoNames)
+
+	genoxfeno_3 <- genoxfeno_2[,1:(ploidy+1)]*phenoValues
 
 	# Remove rows with NAs from genoxfeno_3 
 	g3NAs                 = genoxfeno_3
@@ -78,28 +81,21 @@ createHeatmapForSNP <- function (outputDir, genoFileACGT, genoFileNUM, phenoFile
 	genoxfenov4           = as.matrix(g3noNAs)
 	rownames(genoxfenov4) = rownames (g3noNAs)
 
-	#marker=t(genotypeACGT[genotypeACGT$Marker==snpId,])
-	marker=t(genotypeACGT[genotypeACGT[,1]==snpId,])
-	marker_3<-as.matrix(marker[-1:-3,])
+	data_geno_NUM_ACGT<-data.frame(samplesMarkerMatrixNUM,samplesMarkerMatrixACGT)
 
-	marker_3
-	z<-data.frame(marker_3)
-	data_geno_num_ACGT<-data.frame(marker_2,marker_3)
-	data_geno_num_ACGT
-	
-	gen_0<-subset(data_geno_num_ACGT,marker_2=="0",select = marker_3)
-	o<-as.character(gen_0$marker_3[1])    
-	gen_4<-subset(data_geno_num_ACGT,marker_2=="4",select = marker_3)
-	a<-as.character(gen_4$marker_3[1])
-	gen_1<-subset(data_geno_num_ACGT,marker_2=="1",select = marker_3)
-	l<-as.character(gen_1$marker_3[1])
-	gen_2<-subset(data_geno_num_ACGT,marker_2=="2",select = marker_3)
-	s<-as.character(gen_2$marker_3[1])
-	gen_3<-subset(data_geno_num_ACGT,marker_2=="3",select = marker_3)
-	E<-as.character(gen_3$marker_3[1])
-	colnames(genoxfenov4)<-c(o,l,s,E,a)
 
-	my_palette <- colorRampPalette(c("white", "blue", "darkblue", "darkred"))(n = 100)
+	# Get genotype names (e.g AAAA,..,AAGG,...,GGGG)
+	namesGen = c()
+	for (i in 0:ploidy) {
+		gen = subset (data_geno_NUM_ACGT, samplesMarkerMatrixNUM==i,select = samplesMarkerMatrixACGT)
+		g   = as.character (gen$samplesMarkerMatrixACGT[1])    
+		namesGen = c(namesGen, g)
+	}
+	colnames(genoxfenov4) = namesGen
+
+	#my_palette <- colorRampPalette(c("white", "blue", "darkblue", "darkred"))(n = 100)
+	#my_palette <- colorRampPalette(c("white", "blue", "darkblue", "darkred"))(n = 100)
+	my_palette <- colorRampPalette(c("black", "blue", "red"))(n = 50)
 	lmat <- rbind(c(5,4), c(2,3), c(2,1))
 	lhei <- c(12,0.1,32)
 	lwid <- c(3,9)
@@ -109,21 +105,39 @@ createHeatmapForSNP <- function (outputDir, genoFileACGT, genoFileNUM, phenoFile
 	  hist(phenoValues, main = "Histogram", xlab=trait)
 	}
 
+	# Function that call heatmap.2 (only to save code)
+	fun_heatmap <- function () {
+		hmap = heatmap.2(genoxfenov4,
+						 #cellnote=genoxfenov4,
+						 dendrogram = "row",
+						 reorderfun=function(snpId, w) reorder(snpId, w, agglo.FUN = mean),
+						 Colv=FALSE,
+						 adjCol = c(NA,0),
+						 key=TRUE,
+						 srtCol=360,
+						 col=my_palette,
+						 cexCol = 1,
+						 lmat=lmat,
+						 lhei=lhei, 
+						 lwid=lwid, 
+						 extrafun=myplot,
+						 key.xlab=paste0 ("Value of ", trait), 
+						 xlab=snpId, key.title="Color Key",
+						 #rowsep=c(0:nrow(genoxfenov4)),
+		                 #sepcolor = "red",
+						 #sepwidth = c(0.001,0.001)
+						 colsep=c(0:ploidy+1)
+						 )
+	}
+
 	outName = paste0 (outputDir, "/out-SNPProfile") 
 	pdf (paste0(outName,"-", snpId, ".pdf"), width=7, height=7)
-	hmap = heatmap.2(genoxfenov4,dendrogram = "row",reorderfun=function(snpId, w) reorder(snpId, w, agglo.FUN = mean),
-			  Colv=FALSE,adjCol = c(NA,0),key=TRUE,srtCol=360,
-			  col=my_palette,cexCol = 1,lmat=lmat,lhei=lhei, lwid=lwid, extrafun=myplot, 
-			  key.xlab=paste0 ("Value of ", trait), xlab=snpId, key.title="Color Key")
+		fun_heatmap ()
 	dev.off()
 
 	png (paste0(outName,"-",snpId, ".png"), width=7, height=7, units="in", res=72)
-	hmap = heatmap.2(genoxfenov4,dendrogram = "row",reorderfun=function(snpId, w) reorder(snpId, w, agglo.FUN = mean),
-			  Colv=FALSE,adjCol = c(NA,0),key=TRUE,srtCol=360,
-			  col=my_palette,cexCol = 1,lmat=lmat,lhei=lhei, lwid=lwid, extrafun=myplot, 
-			  key.xlab=paste0 ("Value of ", trait), xlab=snpId, key.title="Color Key")
+		fun_heatmap ()
 	dev.off()
-
 }
 
 #-------------------------------------------------------------
