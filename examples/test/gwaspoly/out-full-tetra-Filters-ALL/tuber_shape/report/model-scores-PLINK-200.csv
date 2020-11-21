@@ -1,5 +1,0 @@
-MODEL,GC,SHAREDNSPS,scoreGC,scoreShared,scoreSign,score
-additive,1.263,468,0.737,0.585,1,2.322
-recessive,1.148,436,0.852,0.545,0,1.397
-dominant,1.263,446,0.737,0.5575,0,1.2945
-genotypic,1.584,446,0.416,0.5575,0,0.9735
