@@ -18,7 +18,7 @@ main <- function () {
 	params$phenotypeFile     = args [2] 
 	params$trait             = colnames (read.csv (params$phenotypeFile))[2]
 	params$ploidy            = 4
-	params$gwasModel         = "Naive"
+	params$gwasModel         = "naive"
 	params$snpModels         = c("general","additive","1-dom", "2-dom", "diplo-general", "diplo-additive")
 	params$correctionMethod  = "Bonferroni"
 	params$significanceLevel = 0.05
@@ -57,7 +57,7 @@ runToolGwaspoly <- function (params) {
 			snpModels = modelsDiplo
 	else  # But if user specifided just one model
 		if (params$geneAction == "dominant" & params$ploidy==4)
-			snpModels = c ("2-dom")
+			snpModels = c ("1-dom", "2-dom")
 		else if (params$geneAction == "dominant" & params$ploidy==2)
 			snpModels = c ("1-dom")
 		else
@@ -92,7 +92,7 @@ runToolGwaspoly <- function (params) {
 controlPopulationStratification <- function (data1, gwasModel) {
 	msgmsg ();msgmsg("Controlling populations structure...")
 
-	if (gwasModel=="Naive") {
+	if (gwasModel=="naive") {
 		msgmsg("    >>>> Without any correction") 
 		markers       = data1@pheno [,1]
 		n             = length (markers)
@@ -100,7 +100,7 @@ controlPopulationStratification <- function (data1, gwasModel) {
 		#dataTmp      <- set.K (data1, K=kinshipMatrix)
 		dataTmp       = set.K (data1, K=NULL)
 		data2         = new ("GWASpolyStruct", dataTmp)
-	}else if (gwasModel == "Full") {
+	}else if (gwasModel == "full") {
 		msgmsg("    >>>> Using default Kinship and PCs=5 ")
 		kinshipMatrix = NULL
 		dataTmp       = set.K (data1)
@@ -121,7 +121,7 @@ runGwaspoly <- function (data2, params, NCORES) {
 	correctionMethod = params$correctionMethod
 	signLevel        = params$significanceLevel
 
- 	if (gwasModel %in% c("Naive")) {
+ 	if (gwasModel %in% c("naive")) {
 		msgmsg(">>>> Without params")
 		data3 = GWASpoly(data2, models=snpModels, traits=NULL, params=NULL, n.core=NCORES)
 	}else {

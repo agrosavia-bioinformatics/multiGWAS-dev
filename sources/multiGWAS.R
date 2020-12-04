@@ -1,7 +1,8 @@
 #!/usr/bin/Rscript
-DEBUG = F
+DEBUG = T; SILENT=T
+
 options (width=300)
-if (DEBUG) options (warn=2)
+if (DEBUG) {SILENT <- FALSE;options (warn=2)}
 #source ("lglib06.R")
 
 # INFO  : Tool for running GWAS integratind four GWAS tools: 
@@ -26,6 +27,7 @@ usageInstructions <- function () {
 #-------------------------------------------------------------
 main <- function () {
 	message ("MultiGWAS 1.0")
+	message ("Working dir: ", getwd())
 	args = commandArgs(trailingOnly = TRUE)
 
 	if (length (args) < 1) 
@@ -86,7 +88,7 @@ processConfigFile <- function (args) {
 
 	# Read and check config file arguments
 	msg ("Reading configuration file...")
-	config     = getMainConfig (configFile)
+	config     = readCheckConfigParameters (configFile)
 
 	mainDir = getwd ()
 	for (traitConfigName in config$traitConfigList) {
@@ -127,7 +129,7 @@ mainSingleTrait <- function (traitConfigName) {
 	# Read, filter, and check phenotype and genotype
 	msg ("Preprocessing genomic data (Filtering and Formating data)...")
 
-	data <- genoPhenoMapProcessing (config$genotypeFile, config$genotypeType,
+	data <- genoPhenoMapProcessing (config$genotypeFile, config$genotypeFormat,
 									config$phenotypeFile, config$mapFile, config)
 
 	config$genotypeFile  = data$genotypeFile
@@ -165,7 +167,7 @@ getTraitConfig <- function (traitConfigName) {
 		runCommand (sprintf ("cp %s %s", traitConfigName, dir))
 		runCommand (sprintf ("cp %s %s", config$genotypeFile, dir ))
 		runCommand (sprintf ("cp %s %s", config$phenotypeFile, dir))
-		if (config$genotypeType %in% c("kmatrix", "fitpoly"))
+		if (config$genotypeFormat %in% c("kmatrix", "fitpoly"))
 			runCommand (sprintf ("cp %s %s", config$mapFile, dir))
 	}
 	# Change to the working dir and set dirs in config
@@ -179,72 +181,79 @@ getTraitConfig <- function (traitConfigName) {
 #-------------------------------------------------------------
 # Get params from config file and define models according to ploidy
 #-------------------------------------------------------------
-getMainConfig <- function (configFile) {
-	config     = config::get (file=configFile, config="advanced") 
-	config$configFilename = configFile
+readCheckConfigParameters <- function (paramsFile) {
+	params     = config::get (file=paramsFile, config="advanced") 
+	params$paramsFilename = paramsFile
 
-	# Still unimplemented "all" option in some tools for (e.g PLINK)
-	if (is.null (config$geneAction))
-		config$geneAction = "additive"
-	if (is.null (config$traitType))
-		config$traitType = "quantitative"
+	# Set default values if not set
+	if (is.null (params$geneAction)) params$geneAction = "additive"
+	if (is.null (params$traitType)) params$traitType = "quantitative"
 
-	# Check input files
-	if (!file.exists (config$genotypeFile) | !file.exists (config$phenotypeFile)) {
-		errorMessage = "Input files (genotype or phenotype) not found!!"
-		errorMessage = paste0 (errorMessage, "\n\t Genotype: ", config$genotypeFile)
-		errorMessage = paste0 (errorMessage, "\n\t Phenotype: ", config$phenotype)
+	# Change to lower case text parameters
+	params$genotypeFormat   = tolower (params$genotypeFormat) 
+
+	params$correctionMethod   = tolower (params$correctionMethod) 
+	if (params$correctionMethod == "bonferroni") params$correctionMethod = "Bonferroni"
+	else if (params$correctionMethod == "fdr")   params$correctionMethod = "FDR"
+	else stop (paste0 ("Unknown correction method: ", params$correctionMethod), call.=T)
+	
+	params$gwasModel        = tolower (params$gwasModel) 
+	params$filtering        = ifelse (tolower (params$filtering)=="true", T, F) 
+	params$tools            = tolower (params$tools) 
+	params$geneAction       = tolower (params$geneAction) 
+
+	`%notin%` <- Negate(`%in%`)
+
+	# Check possible errors in ploidy and input files
+	if (params$ploidy %notin% c("2", "4"))   stop ("Ploidy not supported")
+	if (!file.exists (params$genotypeFile))  {
+		errorMessage = paste0 ("Genotype file not found: ", getwd(),"--", params$genotypeFile)
 		stop (errorMessage, call.=T)
 	}
-	if (config$genotypeType=="kmatrix" && !file.exists (config$mapFile)) {
-		errorMessage = "map file not found!!"
-		errorMessage = paste0 (errorMessage, "\n\t Map file: ", config$mapFile)
-		stop (errorMessage)
+
+	if (!file.exists (params$phenotypeFile))  {
+		errorMessage = paste0 ("Phenotype file not found: ", params$phenotypeFile)
+		stop (errorMessage, call.=T)
 	}
 
-	# Print config file
-	msgmsg ("------------------------------------------------")
+	if (params$genotypeFormat %in% c("kmatrix", "fitpoly")) {
+		if (is.null (params$mapFile))      stop ("Map file needed in configuration fil")
+		if (!file.exists (params$mapFile)) stop ("Map file not found")
+	}
+
+
+	# Print params file
+	msgmsg ("-----------------------------------------------------------")
 	msgmsg ("Summary of configuration parameters:")
-	msgmsg ("------------------------------------------------")
-	msgmsg ("Ploidy                 : ", config$ploidy) 
-	msgmsg ("Genotype filename      : ", config$genotypeFile) 
-	msgmsg ("Phenotype filename     : ", config$phenotypeFile) 
-	msgmsg ("Significance level     : ", config$significanceLevel) 
-	msgmsg ("Correction method      : ", config$correctionMethod) 
-	msgmsg ("GwAS model             : ", config$gwasModel) 
-	msgmsg ("Number of repored SNPs : ", config$nBest) 
-	msgmsg ("Filtering              : ", config$filtering) 
-	msgmsg ("MIND                   : ", config$MIND) 
-	msgmsg ("GENO                   : ", config$GENO) 
-	msgmsg ("MAF                    : ", config$MAF) 
-	msgmsg ("HWE                    : ", config$HWE) 
-	msgmsg ("Tools                  : ", config$tools) 
-	msgmsg ("------------------------------------------------")
-	msgmsg ("Gene action model      : ", config$geneAction) 
-	msgmsg ("Trait type             : ", config$traitType) 
-	msgmsg ("------------------------------------------------")
+	msgmsg ("-----------------------------------------------------------")
+	for (i in 1:length (params)) {
+		msgmsg (sprintf ("%-18s : %s", names (params[i]), if (is.null (params [i][[1]])) "NULL" else params [i][[1]]    ))
+	}
+	msgmsg ("-----------------------------------------------------------")
 
 	# Create output dir for this project
-	outDir   = paste0 ("out-", strsplit (configFile, split="[.]") [[1]][1])
+	outDir   = paste0 ("out-", strsplit (paramsFile, split="[.]") [[1]][1])
 	createDir (outDir)
-	runCommand(sprintf ("cp %s %s", config$genotypeFile, outDir))
-	runCommand(sprintf ("cp %s %s", config$phenotypeFile, outDir))
-	runCommand(sprintf ("cp %s %s", config$mapFile, outDir))
+	runCommand(sprintf ("cp %s %s", params$genotypeFile, outDir))
+	runCommand(sprintf ("cp %s %s", params$phenotypeFile, outDir))
+	print (params$genotypeFormat)
+	if (params$genotypeFormat %in% c("kmatrix", "fitpoly")) 
+		runCommand(sprintf ("cp %s %s", params$mapFile, outDir))
 
 	# Change to the working dir of the main projet 
 	setwd (outDir)
 	
-	# Create config files for each trait
-	phenotype = read.csv (config$phenotypeFile, check.names=F)
+	# Create params files for each trait
+	phenotype = read.csv (params$phenotypeFile, check.names=F)
 	traitList = colnames (phenotype)[-1]
 	traitConfigList = c()
 	for (traitName in traitList) {
-		traitConfig     = createTraitConfigFiles (phenotype, traitName, configFile, config)
+		traitConfig     = createTraitConfigFiles (phenotype, traitName, paramsFile, params)
 		traitConfigList = c (traitConfigList, traitConfig)
 	}
 
-	config$traitConfigList = traitConfigList 
-	return (config)
+	params$traitConfigList = traitConfigList 
+	return (params)
 }
 
 #-------------------------------------------------------------
@@ -266,7 +275,7 @@ runGWASTools <- function (config) {
 	for (i in 1:length(config$tools)) 
 		msgmsg ("Running ", config$tools [i])
 
-	mclapply (config$tools, runOneTool, config, mc.cores=NCORES, mc.silent=T)
+	mclapply (config$tools, runOneTool, config, mc.cores=NCORES, mc.silent=SILENT)
 }
 
 
@@ -290,13 +299,15 @@ moveOutFiles <- function (outputDir, reportDir)
 # Read and check files, sample samples
 # Convert geno an pheno to other tool formats 
 #-------------------------------------------------------------
-genoPhenoMapProcessing <- function (genotypeFile, genotypeType, phenotypeFile, mapFile, config) {
-	# Check for VCF, GWASpoly, k-matrix, or fitPoly.
-	# and convert to GWASpoly format
-	genotypeFile = genotypeProcessing (genotypeFile, genotypeType, mapFile, config$ploidy)
+genoPhenoMapProcessing <- function (genotypeFile, genotypeFormat, phenotypeFile, mapFile, config) {
+	# Convert to gwaspoly format from other formats: VCF, GWASpoly, k-matrix, or fitPoly.
+	genotypeFile  = genotypeProcessing (genotypeFile, genotypeFormat, mapFile, config$ploidy)
+
+	# Filter by valid markers (alleles lenght, call rate SNPs and Samples)
+	validGenotype = filterByValidMarkers (genotypeFile, config$ploidy, config$GENO, config$MIND)
 
 	# Filter by common markers, samples and remove duplicated and NA phenos
-	common        = filterByCommonMarkersSamples (genotypeFile, phenotypeFile)
+	common        = filterByCommonMarkersSamples (validGenotype, phenotypeFile)
 	genotypeFile  = common$genotypeFile
 	phenotypeFile = common$phenotypeFile
 	trait         = common$trait
@@ -329,7 +340,7 @@ genoPhenoMapProcessing <- function (genotypeFile, genotypeType, phenotypeFile, m
 
 		# Create plink files
 		plinkFile  = paste0 ("out/", strsplit (basename(genotypeFile), split="[.]")[[1]][1], "-plink")
-		gwaspToPlinkFormat (genotypeFile, plinkFile)
+		gwaspolyToPlinkFormat (genotypeFile, plinkFile)
 
 		# Make plink binary files from text file
 		cmm = paste ("plink --file", plinkFile, "--allow-extra-chr --make-bed", "--out", plinkFile)
@@ -346,7 +357,7 @@ genoPhenoMapProcessing <- function (genotypeFile, genotypeType, phenotypeFile, m
 
 	msgmsg ("Converting phenotype for plink and TASSEL and create VCF genotype for TASSEL...")
 	gwasp2plinkPhenotype  (phenotypeFile,"out/filtered-plink-phenotype.tbl") 
-	gwaspToTasselPhenotype (phenotypeFile,"out/filtered-tassel-phenotype.tbl") 
+	gwaspolyToTasselPhenotype (phenotypeFile,"out/filtered-tassel-phenotype.tbl") 
 	plinkToVCFFormat ("out/filtered-plink-genotype", "out/filtered-tassel-genotype")
 
 	return (list (genotypeFile=genotypeFile, phenotypeFile=phenotypeFile, trait=common$trait))
@@ -369,6 +380,9 @@ genotypeProcessing <- function (genotypeFile, type, mapFile, ploidy) {
 	}else if (type=="vcf") {
 		msgmsg ("Converting VCF genotype ...")
 		newGenotypeFile = convertVCFToACGTByNGSEP (genotypeFile) #output: filename.csv
+		message (">>>>")
+		message (newGenotypeFile)
+		message (">>>>")
 
 	}else if (type=="fitpoly"){
 		newGenotypeFile = convertFitpolyToGwaspolyGenotype (genotypeFile, mapFile) #output: filename.csv
@@ -391,7 +405,7 @@ filterByQCFilters <- function (genotypeFile, phenotypeFile, config)
 	# Format convertion from gwasp4 to plink2
 	#msgmsg ("Converting gwaspoly to plink formats...")
 	plinkFile  = paste0 ("out/", strsplit (basename(genotypeFile), split="[.]")[[1]][1], "-plink")
-	gwaspToPlinkFormat (genotypeFile, plinkFile)
+	gwaspolyToPlinkFormat (genotypeFile, plinkFile)
 
 	#cmm = paste ("plink --file", plinkFile, "--make-bed", "--out", paste0(plinkFile,"-QC"))
 	cmm = paste ("plink --file", plinkFile, "--make-bed --allow-extra-chr", "--out", paste0(plinkFile,"-QC"))
@@ -399,9 +413,9 @@ filterByQCFilters <- function (genotypeFile, phenotypeFile, config)
 	# Create string for plink command with filters 
 	msgmsg ("Filtering by missingness, MAF, and HWE")
 	# Filter missingness per sample (MIND)"
-	if (!is.null(config$MIND)) cmm=paste (cmm, paste ("--mind", config$MIND))
+	#if (!is.null(config$MIND)) cmm=paste (cmm, paste ("--mind", config$MIND))
 	# Filter missingness per SNP    (GENO)
-	if (!is.null(config$GENO)) cmm=paste (cmm, paste ("--geno", config$GENO))
+	#if (!is.null(config$GENO)) cmm=paste (cmm, paste ("--geno", config$GENO))
 
 	# Obsolete, calculate directly 
 	#### Filter SNPs with a low minor allele frequency (MAF)
@@ -858,6 +872,7 @@ withCallingHandlers (
 	main (), 
 	error = function (e) { 
 		if (DEBUG){
+			print (geterrmessage ())
 			print (sys.calls()[-1])
 			quit ()
 		}

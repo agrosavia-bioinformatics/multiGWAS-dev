@@ -29,6 +29,7 @@ main <- function ()
 	args = commandArgs (trailingOnly=T)
 
 	genotypeFile  = args [1]
+	NCORES <<- 1
 
 	#numericTetraToNumericDiploGSMatrix (genotypeFile)
 	#convertVCFToACGTByNGSEP (inputFilename)
@@ -38,9 +39,80 @@ main <- function ()
 	#getCommonGenoPhenoMap (args[1], args[2])
 	#createGwaspolyGenotype (args [1], args [2], 4)
 	#convertFitpolyToKMatrix (args [1])
-	convertFitpolyToGwaspolyGenotype (args [1], args [2])
+	#convertFitpolyToGwaspolyGenotype (args [1], args [2])
+	filterByValidMarkers (args [1], 4, 0.1, 0.1)
 }
 
+#-------------------------------------------------------------
+# Check valid markers (e.g. "AAG", "A", "")
+#-------------------------------------------------------------
+filterByValidMarkers <- function (genotypeFile, ploidy, callRateSNPs, callRateSamples) {
+	message ("Checking valid markers...")
+	geno                = read.csv (file=genotypeFile, check.names=F)
+	allelesGeno         = as.matrix(geno[,-(1:3)])
+
+
+	map                 = geno [,1:3]
+	sampleNames         = colnames (geno[,-(1:3)])
+	markerNames         = geno [1,]
+	rownames(allelesGeno) = geno[,1]
+
+	# Check valid lenght of alleles 
+	setNAs <- function (alleles, ploidy) {
+		if (is.na (alleles) || nchar (alleles) < ploidy)
+			return (NA)
+		return (alleles)
+	}
+
+	allelesList = unlist (mclapply (allelesGeno,  setNAs, ploidy, mc.cores=NCORES))
+	allelesMat  = matrix (allelesList, nrow=nrow(allelesGeno), ncol=ncol(allelesGeno))
+	colnames (allelesMat) = colnames (allelesGeno)
+
+
+	validGeno = cbind (map, allelesMat)
+	validFile   = addLabel (genotypeFile, "VALIDSNPs")
+	write.csv (validGeno, validFile, quote=F, row.names=F)
+
+	# Check call rate of samples and markers
+	calcPropNAs <- function (alleles) {
+		prop = sum (is.na (alleles)) / length (alleles)
+		return (prop)
+	}
+
+	propsSNPs    = apply (allelesMat, 1, calcPropNAs)
+	propsSamples = apply (allelesMat, 2, calcPropNAs)
+	badSNPs      = which (propsSNPs > callRateSNPs)
+	badSamples   = which (propsSamples > callRateSamples)
+
+	if (length (badSNPs) > 0) {
+		map        = map [-badSNPs,]
+		allelesMat = allelesMat [-badSNPs,]
+	}
+	if (length (badSamples) > 0) 
+		allelesMat = allelesMat [, -badSamples]
+
+	# Check if all chromosome names are numeric
+	anyNonNumericChrom <- function (chrs) {
+		suppressWarnings (any (is.na (as.numeric (chrs))))
+	}
+
+	# if non-numeric Chromosome names, convert to numeric using factors
+	chrs = as.character (map [,2])
+	if  (anyNonNumericChrom (chrs)==TRUE) {
+		msgmsg ("!!!Mapping chromosome names to numbers (see 'out-mapped-chromosome-names.csv') file...")
+		chrs            = as.factor (chrs)
+		levels (chrs)   = 1:length (levels (chrs))
+		write.csv (data.frame (ORIGINAL_CHROM=map[,2], NEW_CHROM=chrs), "out-mapped-chromosome-names.csv", quote=F, row.names=F)
+		map [,2] = chrs
+	}
+
+	#callRateGeno = cbind (map [-badSNPs,], allelesMat [-badSNPs, -badSamples])
+	callRateGeno = cbind (map, allelesMat)
+	callRateFile = addLabel (validFile, "NOMISSINGSNPs")
+	write.csv (callRateGeno, callRateFile, quote=F, row.names=F)
+
+	return (callRateFile)
+}
 #-------------------------------------------------------------
 # Get common sample names
 #-------------------------------------------------------------
@@ -307,7 +379,7 @@ plinkToVCFFormat <- function (plinkFile, outFile) {
 #------------------------------------------------------------------------------
 ## Format and write gwasp to tassel phenotype (For rtassel)
 #------------------------------------------------------------------------------
-gwaspToTasselPhenotype<- function (gwaspPhenotypeFile, outFilename="") 
+gwaspolyToTasselPhenotype<- function (gwaspPhenotypeFile, outFilename="") 
 {
 	gwaspPhenotype = read.csv (file=gwaspPhenotypeFile, header=T, check.names=F, )
 	taxa           = as.character (gwaspPhenotype [,1])
@@ -369,7 +441,7 @@ gwasp2plinkPhenotype <- function (gwaspPhenoFile, outFile="")
 #------------------------------------------------------------------------------
 # Gwasp to plink format (.ped .map)
 #------------------------------------------------------------------------------
-gwaspToPlinkFormat <- function (genotypeFile, plinkFile) {
+gwaspolyToPlinkFormat <- function (genotypeFile, plinkFile) {
 	markersIdsMap = createPlinkMapFromGwaspolyGenotype (genotypeFile, plinkFile)
 	plinkFile     = createPlinkPedFromGwaspolyGenotype (genotypeFile, plinkFile)
 	#plinkFile     = createPlinkPedFromGwaspolyGenotype (genotypeFile, markersIdsMap)
@@ -831,7 +903,7 @@ msg <- function (...)
 #-------------------------------------------------------------
 # Run a command string using system function and writes output to log file
 #-------------------------------------------------------------
-runCommand <- function (command, logFile="gwas.log", DEBUG=F) 
+runCommand <- function (command, logFile="gwas.log") 
 {
 	if (DEBUG==T) {
 		msgmsg (">>>> ", command)

@@ -59,11 +59,11 @@ runPlinkCommand <- function (params, geneAction, outFile)
 	}
 
 	# Naive or FUll GWAS model
-	if (model=="Naive") { 
-		cmm=sprintf ("%s/sources/scripts/script-plink-NaiveModel.sh %s %s %s", HOME, inGeno, inPheno, outFile)
+	if (model=="naive") { 
+		cmm=sprintf ("%s/sources/scripts/script-plink-NaiveModel.sh %s %s %s %s", HOME, inGeno, inPheno, outFile, geneAction)
 		runCommand (cmm, "log-Plink.log")
 
-	}else if (model=="Full") {
+	}else if (model=="full") {
 		# FIRST: kinship filtering of .ped file
 		outKinFile = paste0 (inGeno, "-", geneAction, "-kinship-plink")
 		cmm=sprintf ("%s/sources/scripts/script-kinship-plink2.sh %s %s", HOME, inGeno, outKinFile)
@@ -93,6 +93,6 @@ runPlinkCommand <- function (params, geneAction, outFile)
 
 	model      = ifelse (geneAction=='', "additive", geneAction)  # But Plink offers other tow gene action models: "ADD", "DOM", "GNR" (ADD+COM)
 	resultsAll = cbind (MODEL=model, GC=gcs$delta, CHR=chromosomes, POS=positions, P=pValues, 
-						SCORE=scores, THRESHOLD=threshold, DIFF=diffs, resultsLinear)
+						SCORE=scores, THRESHOLD=threshold, DIFF=diffs, resultsLinear, row.names=NULL)
 	return (resultsAll)
 }

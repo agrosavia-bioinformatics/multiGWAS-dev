@@ -39,10 +39,10 @@ main <- function () {
 	genotypeFile  = "out/filtered-gwasp4-genotype.tbl"
 	phenotypeFile = "out/filtered-gwasp4-phenotype.tbl"
 	outputDir     = "report/"
-	gwasModel     = "Full"
+	gwasModel     = "full"
 	nBest         = 10
 	ploidy        = 4
-	geneAction    = "all"
+	geneAction    = "additive"
 
 	createReports (inputDir, genotypeFile, phenotypeFile, 
 				   ploidy, gwasModel, outputDir, nBest, geneAction)
@@ -360,54 +360,57 @@ selectBestModel <- function (data, nBest, tool, geneAction) {
 # Create Venn diagram of common markers using info from summary table
 #------------------------------------------------------------------------
 markersVennDiagrams <- function (summaryTable, gwasModel, scoresType, outFile){
-	# Params for figure shape and fonts
 	WIDTH  = 7
 	HEIGHT = 9
-	CEXLABELS = 0.6
-	CEXTITLES = 1.0
+	if (nrow (summaryTable) > 0) {
+		# Params for figure shape and fonts
+		CEXLABELS = 0.6
+		CEXTITLES = 1.0
 
-	flog.threshold(ERROR)
-	# Mark with "*" signficatives but if shared and no signifactive in one tool: not in the instersections
-	#fs <- function (x) {if (x[10]=="TRUE") x[4]=paste0("*", x[4]);return(x)}
-	#summaryTableMarks =as.data.frame (t(apply (summaryTable, 1, fs)))
+		flog.threshold(ERROR)
+		# Mark with "*" signficatives but if shared and no signifactive in one tool: not in the instersections
+		#fs <- function (x) {if (x[10]=="TRUE") x[4]=paste0("*", x[4]);return(x)}
+		#summaryTableMarks =as.data.frame (t(apply (summaryTable, 1, fs)))
 
-	x <- list()
-	x$GWASpoly = summaryTable %>% filter (TOOL %in% "GWASpoly") %>% select (SNP) %>% .$SNP
-	x$SHEsis   = summaryTable %>% filter (TOOL %in% "SHEsis") %>% select (SNP) %>% .$SNP
-	x$PLINK    = summaryTable %>% filter (TOOL %in% "PLINK")  %>% select (SNP) %>% .$SNP
-	x$TASSEL   = summaryTable %>% filter (TOOL %in% "TASSEL") %>% select (SNP) %>% .$SNP
+		x <- list()
+		x$GWASpoly = summaryTable %>% filter (TOOL %in% "GWASpoly") %>% select (SNP) %>% .$SNP
+		x$SHEsis   = summaryTable %>% filter (TOOL %in% "SHEsis") %>% select (SNP) %>% .$SNP
+		x$PLINK    = summaryTable %>% filter (TOOL %in% "PLINK")  %>% select (SNP) %>% .$SNP
+		x$TASSEL   = summaryTable %>% filter (TOOL %in% "TASSEL") %>% select (SNP) %>% .$SNP
 
-	# Create Venn diagram
-	mainTitle = paste0(gwasModel, "-", scoresType)
-	COLORS= c("red", "blue", "yellow", "green")
-	v0 <- venn.diagram(x, height=2000, width=3000, alpha = 0.5, filename = NULL, # main=mainTitle,
-						col = COLORS, cex=CEXLABELS, cat.cex=CEXTITLES, 
-						margin=0.0, fill = COLORS)
+		# Create Venn diagram
+		mainTitle = paste0(gwasModel, "-", scoresType)
+		COLORS= c("red", "blue", "yellow", "green")
+		v0 <- venn.diagram(x, height=2000, width=3000, alpha = 0.5, filename = NULL, # main=mainTitle,
+							col = COLORS, cex=CEXLABELS, cat.cex=CEXTITLES, 
+							margin=0.0, fill = COLORS)
 
-	overlaps <- calculate.overlap(x)
-	overlaps <- rev(overlaps)
+		overlaps <- calculate.overlap(x)
+		overlaps <- rev(overlaps)
 
-	posOverlap = as.numeric (gsub ("a","", (names (overlaps))))
-	for (i in 1:length(overlaps)){
-		pos = posOverlap [i]
-		v0[[pos+8]]$label <- paste(overlaps[[i]], collapse = "\n")
- 	}
+		posOverlap = as.numeric (gsub ("a","", (names (overlaps))))
+		for (i in 1:length(overlaps)){
+			pos = posOverlap [i]
+			v0[[pos+8]]$label <- paste(overlaps[[i]], collapse = "\n")
+		}
 
+		# Get shared SNPs
+		dataSNPsNs     = data.frame (add_count (summaryTable, SNP, sort=T)); 
+		dataSNPsShared = dataSNPsNs[dataSNPsNs$n > 1,]
+		dataSNPsNoDups = dataSNPsShared [!duplicated (dataSNPsShared$SNP),]
+		sharedSNPs     = dataSNPsNoDups$SNP
+	}else { # Empty summaryTable
+		v0 = grid.text ("No Venn Diagram  (without significative SNPs)")
+		sharedSNPs = NULL
+	}
 
- 	png (paste0 (outFile,".png"), width=WIDTH, height=HEIGHT, units="in", res=120)
+	png (paste0 (outFile,".png"), width=WIDTH, height=HEIGHT, units="in", res=120)
 	grid.draw(v0)
 	dev.off()
 	pdf (paste0 (outFile,".pdf"), width=WIDTH,height=HEIGHT)
 	grid.draw(v0)
 	dev.off()
 	
-	# Get shared SNPs
-	dataSNPsNs     = data.frame (add_count (summaryTable, SNP, sort=T)); 
-	dataSNPsShared = dataSNPsNs[dataSNPsNs$n > 1,]
-	dataSNPsNoDups = dataSNPsShared [!duplicated (dataSNPsShared$SNP),]
-	sharedSNPs     = dataSNPsNoDups$SNP
-
-
 	return (sharedSNPs)
 }
 
@@ -611,7 +614,7 @@ createChordDiagramSharedSNPs <- function (scoresFile) {
 		funCreateChords ()
 	dev.off()
 	#PNG
-	png (file=paste0 (outFile, ".png"), width=5, height=5	, units="in", res=90)
+	png (file=paste0 (outFile, ".png"), width=7, height=7	, units="in", res=90)
 		funCreateChords ()
 	dev.off()
 }

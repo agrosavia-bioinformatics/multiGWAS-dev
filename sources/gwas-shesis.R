@@ -15,9 +15,9 @@ runToolShesis <- function (params)
 	outFile      = paste0 ("out/tool-SHEsis-scores-", params$gwasModel)
 	scoresFile   = paste0 (outFile,".csv")
 
-	if (params$gwasModel == "Naive") {
+	if (params$gwasModel == "naive") {
 		gwaspToShesisGenoPheno (params$genotypeFile, params$phenotypeFile, params$ploidy, params$traitType)
-	} else if (params$gwasModel == "Full") {
+	} else if (params$gwasModel == "full") {
 		# Apply kinship and filter individuals
 		inGeno  = "out/filtered-plink-genotype"       # Uses plink file
 		kinFile = paste0 (inGeno,"-kinship-shesis")
