@@ -166,7 +166,6 @@ showResults <- function (data3, models, trait, gwasModel, phenotypeFile, ploidy)
 # Manhattan and QQ plots
 #-------------------------------------------------------------
 plotMahattanQQ <- function (plotFile, models, data5, trait, data3, gwasModel, ploidy) {
-
 	# Create test models for each ref|alt allele if dominant models present
 	testModels = c()
 	for (m in models)
@@ -179,7 +178,6 @@ plotMahattanQQ <- function (plotFile, models, data5, trait, data3, gwasModel, pl
 	pdf (file=plotFile, width=11, height=15)
 	op <- par(mfrow = c(n,2), mar=c(3.5,3.5,2,1), oma=c(0,0,0,0), mgp = c(2.2,1,0)) #MultiGWAS tools
 	for (i in 1:n) {
-		print (testModels)
 		manhattan.plot (data5, trait=trait, model=testModels [i])
 		qqPlot(data3,trait=trait, model=testModels[i], cex=0.3)
 	}

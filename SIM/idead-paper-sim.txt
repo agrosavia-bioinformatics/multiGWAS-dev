@@ -1,9 +1,0 @@
-- For real-experiment data, power analysis usually relies on many
-factors, including knowledge of Linkage Disequilibrium (LD), which SNPs have been
-genotyped and selected within the LD for GWAS (called tagged SNPs), and a good
-representative sample. Since it is hard to control each of these factors precisely (e.g. a
-perfect representative sample), results from a power calculation may be difficult to obtain
-and may not reflect what would actually happen in real experiments. Therefore, it is
-worthwhile to take a practical approach to examine how input data quantity (sample size)
-influences GWAS results in real experiments.
-

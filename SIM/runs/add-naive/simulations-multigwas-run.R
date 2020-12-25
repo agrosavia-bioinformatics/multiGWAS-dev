@@ -1,1 +1,0 @@
-/home/lg/agrosavia/SIM/runs/simulations-multigwas-run.R

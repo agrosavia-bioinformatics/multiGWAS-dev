@@ -174,7 +174,7 @@ The following parameters from configuration file are related with the type of ge
 It specifies the filename for the genotype data. (see below the accepted genotype formats).
 
 ### "genotypeFormat"
-Currently, MultiGWAS accepts four genotype formats: "gwaspoly", "kmatrix", "vcf", and "fitpoly":
+Currently, MultiGWAS accepts five genotype formats: "gwaspoly", "kmatrix", "vcf", "fitpoly", and "updog":
 - ***"gwaspoly" format:*** table with comma separated values (.csv). Each row contains the marker id, the chromosome, the position in the chromosome, and the following columns correspond to the marker data for each individual codified in the "ACGT" format (e.g., AATT, CCGG, AAAT, GGCG). An example follows:
 ```	 
 | Marker   | Chrom | Position | ACBrador | ACLPI175395 | ADGPI195204 | AdirondackBlue |
@@ -204,7 +204,7 @@ Currently, MultiGWAS accepts four genotype formats: "gwaspoly", "kmatrix", "vcf"
    0   3499519 c2_21332    T   C   .   .   PR  GT  0/1/1/0 0/1/1/1 0/1/1/0
 ```
 
-- ***"fitpoly" format:*** tab separated file with scores file (filePrefix_scores.dat) containing one line per sample for every marker that could be fitted. MultiGWAS uses only two columns from this file: "MarkerName" and "geno", with the name of the marker and the assigned genotype number, respectively. The genotype number is assigned according to the ploidy, for tetraploids from 0 to 4, and for diploids from 0 to 2. An example follows: 
+- ***"fitpoly" format:*** table with tab separated values (scores file e.g. filePrefix_scores.dat) containing one line per sample for every marker that could be fitted. MultiGWAS uses only two columns from this file: "MarkerName" and "geno", with the name of the marker and the assigned genotype number, respectively. The genotype number is assigned according to the ploidy, for tetraploids from 0 to 4, and for diploids from 0 to 2. An example follows: 
 ```
 | marker | MarkerName | SampleName     | ratio | P0    | P1    | P2    | P3    | P4    | maxgeno | maxP  | geno |
 |--------|------------|----------------|-------|-------|-------|-------|-------|-------|---------|-------|------|
@@ -213,6 +213,17 @@ Currently, MultiGWAS accepts four genotype formats: "gwaspoly", "kmatrix", "vcf"
 | 1      | c1_1       | ADGPI195204    | 0.064 | 0.09  | 0.081 | 0.477 | 0.066 | 0.845 | 0       | 0.351 | 0    |
 | 1      | c1_1       | AdirondackBlue | 0.606 | 0.853 | 0.62  | 0.44  | 0.954 | 0.047 | 1       | 0.151 | 1    |
 | 1      | c1_1       | AdirondackRed  | 0.785 | 0.176 | 0.079 | 0.915 | 0.634 | 0.22  | 1       | 0.259 | 1    |
+```
+
+- ***"updog" format:*** table with comma separated values containing one line per sample for every marker that could be fitted. MultiGWAS uses only two columns from this file: "snp" and "geno", with the name of the marker and the assigned genotype number, respectively. The genotype number is assigned according to the ploidy, for tetraploids from 0 to 4, and for diploids from 0 to 2. An example follows: 
+```
+|     snp     | ind   | ref | size | geno | postmean | maxpostprob | Pr_0 | ... | Pr_4 | logL_0  | ... | logL_4 |
+|-------------|-------|-----|------|------|----------|-------------|------| ... |------|---------| ... |--------|
+|PotVar0089524|P3PEM05| 113 | 143  | 3    | 2.99     | 0.99        | 0    | ... | 0    | -176.49 | ... | -39    |
+|PotVar0089524|P2PEM10| 86  | 96   | 3    | 3        | 1           | 0    | ... | 0    | -172.23 | ... | -15.93 |
+|PotVar0089524|P5PEM08| 122 | 142  | 3    | 3        | 1           | 0    | ... | 0    | -201.39 | ... | -25.8  |
+|PotVar0089524|P7PEM09| 80  | 80   | 4    | 4        | 1           | 0    | ... | 1    | -190.47 | ... | -0.18  |
+|PotVar0089524|P5PEM04| 69  | 69   | 4    | 4        | 1           | 0    | ... | 1    | -172.29 | ... | -0.16  |
 ```
 
 ### "phenotypeFile"

@@ -1,4 +1,0 @@
-Trait	Model	Threshold	Marker	Chrom	Position	Ref	Alt	Score	Effect
-train_CT	general	5.03	solcap_snp_c1_15829	3	14646478	A	B	5.09	NA
-train_CT	general	5.03	solcap_snp_c2_55786	4	65970827	A	B	5.18	NA
-train_CT	general	5.03	solcap_snp_c2_55780	4	65971280	A	B	5.58	NA

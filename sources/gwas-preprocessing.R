@@ -25,14 +25,17 @@ HOME = Sys.getenv ("MULTIGWAS_HOME")
 #msgmsg = message
 main <- function () 
 {
+	DEBUG <<- F
 	options (width=300)
 	args = commandArgs (trailingOnly=T)
 
-	genotypeFile  = args [1]
+	inputFile  = args [1]
+	mapFile    = args [2]
 	NCORES <<- 1
 
+	convertVCFToACGTByNGSEP (inputFile)
+
 	#numericTetraToNumericDiploGSMatrix (genotypeFile)
-	#convertVCFToACGTByNGSEP (inputFilename)
 	#convertAABBGWASpolyToNumericFormat (inputFilename)
 	#gwaspTetraToDiploGenotype (genotypeFile)
 	#ACGTToNumericGenotypeFormat (genotypeFile, 4)
@@ -40,79 +43,11 @@ main <- function ()
 	#createGwaspolyGenotype (args [1], args [2], 4)
 	#convertFitpolyToKMatrix (args [1])
 	#convertFitpolyToGwaspolyGenotype (args [1], args [2])
-	filterByValidMarkers (args [1], 4, 0.1, 0.1)
+
+	convertUpdogToKMatrix (args [1])
+	convertUpdogToGwaspolyGenotype (args [1], args [2])
 }
 
-#-------------------------------------------------------------
-# Check valid markers (e.g. "AAG", "A", "")
-#-------------------------------------------------------------
-filterByValidMarkers <- function (genotypeFile, ploidy, callRateSNPs, callRateSamples) {
-	message ("Checking valid markers...")
-	geno                = read.csv (file=genotypeFile, check.names=F)
-	allelesGeno         = as.matrix(geno[,-(1:3)])
-
-
-	map                 = geno [,1:3]
-	sampleNames         = colnames (geno[,-(1:3)])
-	markerNames         = geno [1,]
-	rownames(allelesGeno) = geno[,1]
-
-	# Check valid lenght of alleles 
-	setNAs <- function (alleles, ploidy) {
-		if (is.na (alleles) || nchar (alleles) < ploidy)
-			return (NA)
-		return (alleles)
-	}
-
-	allelesList = unlist (mclapply (allelesGeno,  setNAs, ploidy, mc.cores=NCORES))
-	allelesMat  = matrix (allelesList, nrow=nrow(allelesGeno), ncol=ncol(allelesGeno))
-	colnames (allelesMat) = colnames (allelesGeno)
-
-
-	validGeno = cbind (map, allelesMat)
-	validFile   = addLabel (genotypeFile, "VALIDSNPs")
-	write.csv (validGeno, validFile, quote=F, row.names=F)
-
-	# Check call rate of samples and markers
-	calcPropNAs <- function (alleles) {
-		prop = sum (is.na (alleles)) / length (alleles)
-		return (prop)
-	}
-
-	propsSNPs    = apply (allelesMat, 1, calcPropNAs)
-	propsSamples = apply (allelesMat, 2, calcPropNAs)
-	badSNPs      = which (propsSNPs > callRateSNPs)
-	badSamples   = which (propsSamples > callRateSamples)
-
-	if (length (badSNPs) > 0) {
-		map        = map [-badSNPs,]
-		allelesMat = allelesMat [-badSNPs,]
-	}
-	if (length (badSamples) > 0) 
-		allelesMat = allelesMat [, -badSamples]
-
-	# Check if all chromosome names are numeric
-	anyNonNumericChrom <- function (chrs) {
-		suppressWarnings (any (is.na (as.numeric (chrs))))
-	}
-
-	# if non-numeric Chromosome names, convert to numeric using factors
-	chrs = as.character (map [,2])
-	if  (anyNonNumericChrom (chrs)==TRUE) {
-		msgmsg ("!!!Mapping chromosome names to numbers (see 'out-mapped-chromosome-names.csv') file...")
-		chrs            = as.factor (chrs)
-		levels (chrs)   = 1:length (levels (chrs))
-		write.csv (data.frame (ORIGINAL_CHROM=map[,2], NEW_CHROM=chrs), "out-mapped-chromosome-names.csv", quote=F, row.names=F)
-		map [,2] = chrs
-	}
-
-	#callRateGeno = cbind (map [-badSNPs,], allelesMat [-badSNPs, -badSamples])
-	callRateGeno = cbind (map, allelesMat)
-	callRateFile = addLabel (validFile, "NOMISSINGSNPs")
-	write.csv (callRateGeno, callRateFile, quote=F, row.names=F)
-
-	return (callRateFile)
-}
 #-------------------------------------------------------------
 # Get common sample names
 #-------------------------------------------------------------
@@ -224,7 +159,6 @@ it contains values other than 1, 2, 0 or missing"))
 # and map file (Marker, Ref, Alt, Chrom, Pos)
 #-------------------------------------------------------------
 createGwaspolyGenotype <- function (genotypeFile, mapFile) {
-	msg ("Creating GWASpoly genotype from k-matrix genotype...")
 	geno  = read.csv (genotypeFile, check.names=F, row.names=1)
 	map   = read.csv (mapFile, check.names=F, row.names=1)
 
@@ -244,6 +178,46 @@ createGwaspolyGenotype <- function (genotypeFile, mapFile) {
 }
 
 #----------------------------------------------------------
+# Convert updog file to genotype matrix
+#----------------------------------------------------------
+convertUpdogToGwaspolyGenotype <- function (updogScoresFile, mapFile) {
+	kmatrixFile  = convertUpdogToKMatrix (updogScoresFile)
+	gwaspolyFile = createGwaspolyGenotype (kmatrixFile, mapFile)
+	return (gwaspolyFile)
+}
+#----------------------------------------------------------
+# Convert updog file to genotype matrix
+#----------------------------------------------------------
+convertUpdogToKMatrix <- function (updogScoresFile) {
+	#--- Function to convert fitPoly table to GWASpoly matrix
+	createMatrix <- function (snp, fitGenos) {
+		dataSnp = fitGenos [fitGenos$snp==snp,]
+		genos   = data.frame (t(dataSnp$geno))
+		if (all (is.na (genos))) 
+			return (NULL)
+		names (genos)    = dataSnp$ind
+		rownames (genos) = snp
+		return (genos)
+	 }
+	#------------------------------------------------------
+
+	fitGenos      = read.csv (updogScoresFile)		
+	snpList       = levels (fitGenos$snp)
+	nCores        = ifelse (detectCores()>1, detectCores()-1, 1)
+	nCores = 1
+
+	outs          = mclapply (snpList, createMatrix, fitGenos, mc.cores=nCores)
+	updogGenosDF  = do.call (rbind.data.frame, outs)
+
+	outFilename   = addLabel (updogScoresFile, "KMATRIX")
+
+	updogMatrix = data.frame (Markers=rownames (updogGenosDF), updogGenosDF)
+	write.csv (updogMatrix, outFilename, quote=F, row.names=F)
+	return (outFilename)
+}
+
+
+#----------------------------------------------------------
 # Convert fitpoly file to genotype matrix
 #----------------------------------------------------------
 convertFitpolyToGwaspolyGenotype <- function (fitpolyScoresFile, mapFile) {
@@ -255,7 +229,6 @@ convertFitpolyToGwaspolyGenotype <- function (fitpolyScoresFile, mapFile) {
 # Convert fitpoly file to genotype matrix
 #----------------------------------------------------------
 convertFitpolyToKMatrix <- function (fitpolyScoresFile) {
-	msg ("Converting fitPoly to k-matrix genotype... ")
 	#--- Function to convert fitPoly table to GWASpoly matrix
 	createMatrix <- function (snp, fitGenos) {
 		dataSnp = fitGenos [fitGenos$MarkerName==snp,]
@@ -277,7 +250,7 @@ convertFitpolyToKMatrix <- function (fitpolyScoresFile) {
 
 	outFilename   = addLabel (fitpolyScoresFile, "KMATRIX")
 
-	fitPolyMatrix = data.frame (Makers=rownames (fitGenosDF), fitGenosDF)
+	fitPolyMatrix = data.frame (Markers=rownames (fitGenosDF), fitGenosDF)
 	write.csv (fitPolyMatrix, outFilename, quote=F, row.names=F)
 	return (outFilename)
 }
@@ -957,6 +930,28 @@ addLabel <- function (filename, label, newExt=NULL)  {
 		ext     = newExt
 	newName = paste0 (nameext [[1]][1], "-", label, ".", ext )
 	return (newName)
+}
+
+#----------------------------------------------------------
+# Util to print head of data
+# Fast head, for debug only
+#----------------------------------------------------------
+view <- function (data, n=5,m=6, outPrefix="") {
+	filename = deparse (substitute (data))
+	name = paste (deparse (substitute (data)),":  ")
+	if (is.null (dim (data))) {
+		dimensions = paste (length (data))
+		message (name, class(data), " : (", paste0 (dimensions),")")
+		if (length (data) < 6) n = length(data)
+		print (data[1:n])
+	}else {
+		dimensions = paste0 (unlist (dim (data)),sep=c(" x ",""))
+		message (name, class(data), " : (", paste0 (dimensions),")")
+		if (n==0 | nrow (data) < 5) n = nrow(data)
+		if (m==0 | ncol (data) < 6) m = ncol(data)
+		print (data[1:n,1:m])
+	}
+	write.csv (data, paste0("x-", outPrefix,"-", filename, ".csv"), quote=F, row.names=F)
 }
 #----------------------------------------------------------
 #----------------------------------------------------------

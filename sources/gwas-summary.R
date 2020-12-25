@@ -39,7 +39,7 @@ main <- function () {
 	genotypeFile  = "out/filtered-gwasp4-genotype.tbl"
 	phenotypeFile = "out/filtered-gwasp4-phenotype.tbl"
 	outputDir     = "report/"
-	gwasModel     = "full"
+	gwasModel     = "naive"
 	nBest         = 10
 	ploidy        = 4
 	geneAction    = "additive"

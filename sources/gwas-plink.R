@@ -78,6 +78,7 @@ runPlinkCommand <- function (params, geneAction, outFile)
 	resultsLinearAll = read.table (file=outPlinkLinear,  header=T, check.names=F) 
 	resultsLinear    = resultsLinearAll [!duplicated (resultsLinearAll$SNP),]
 	resultsLinear    = resultsLinear [!is.na (resultsLinear$P),]
+	resultsLinear    = resultsLinear [resultsLinear$P>0,]
 
 	pValues     = resultsLinear$P
 	chromosomes = resultsLinear$CHR

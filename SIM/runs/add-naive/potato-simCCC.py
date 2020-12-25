@@ -1,1 +1,0 @@
-/home/lg/agrosavia/soft/genotyping/SeqBreed/SeqBreed/SIM/potato-simCCC.py

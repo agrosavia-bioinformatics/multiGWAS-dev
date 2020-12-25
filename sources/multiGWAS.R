@@ -1,7 +1,8 @@
 #!/usr/bin/Rscript
-DEBUG = T; SILENT=T
+DEBUG = F; SILENT=T
 
 options (width=300)
+options (error=traceback)
 if (DEBUG) {SILENT <- FALSE;options (warn=2)}
 #source ("lglib06.R")
 
@@ -32,8 +33,6 @@ main <- function () {
 
 	if (length (args) < 1) 
 		stop (usageInstructions())
-	else if (substring (args [1],1,2)=="--")
-		processCommandArguments (args)
 	else
 		processConfigFile (args)
 }
@@ -65,14 +64,6 @@ initGlobalEnvironment <- function () {
 	source (paste0 (HOME, "/sources/gwas-tassel.R"))             # Module with tassel functions
 	source (paste0 (HOME, "/sources/gwas-shesis.R"))             # Module with shesis functions
 	source (paste0 (HOME, "/sources/gwas-lib.R"))             # Module with shesis functions
-}
-
-#-------------------------------------------------------------
-# Process command line arguments
-#-------------------------------------------------------------
-processCommandArguments <- function (args) {
-	if (args [1]=="--fitpoly")
-		commandArgsFitpoly (args)
 }
 
 #-------------------------------------------------------------
@@ -164,10 +155,10 @@ getTraitConfig <- function (traitConfigName) {
 	outDirs    = c(traitDir, outDir)
 	for (dir in outDirs) {
 		createDir (dir)
-		runCommand (sprintf ("cp %s %s", traitConfigName, dir))
-		runCommand (sprintf ("cp %s %s", config$genotypeFile, dir ))
-		runCommand (sprintf ("cp %s %s", config$phenotypeFile, dir))
-		if (config$genotypeFormat %in% c("kmatrix", "fitpoly"))
+		file.copy (traitConfigName, dir)
+		file.copy (config$genotypeFile, dir )
+		file.copy (config$phenotypeFile, dir)
+		if (config$genotypeFormat %in% c("kmatrix", "fitpoly", "updog"))
 			runCommand (sprintf ("cp %s %s", config$mapFile, dir))
 	}
 	# Change to the working dir and set dirs in config
@@ -182,8 +173,17 @@ getTraitConfig <- function (traitConfigName) {
 # Get params from config file and define models according to ploidy
 #-------------------------------------------------------------
 readCheckConfigParameters <- function (paramsFile) {
-	params     = config::get (file=paramsFile, config="advanced") 
+	params                = config::get (file=paramsFile, config="advanced") 
 	params$paramsFilename = paramsFile
+
+	# Print params file
+	msgmsg ("-----------------------------------------------------------")
+	msgmsg ("Summary of configuration parameters:")
+	msgmsg ("-----------------------------------------------------------")
+	for (i in 1:length (params)) 
+		msgmsg (sprintf ("%-18s : %s", names (params[i]), 
+			if (is.null (params [i][[1]])) "NULL" else params [i][[1]]    ))
+	msgmsg ("-----------------------------------------------------------")
 
 	# Set default values if not set
 	if (is.null (params$geneAction)) params$geneAction = "additive"
@@ -195,52 +195,38 @@ readCheckConfigParameters <- function (paramsFile) {
 	params$correctionMethod   = tolower (params$correctionMethod) 
 	if (params$correctionMethod == "bonferroni") params$correctionMethod = "Bonferroni"
 	else if (params$correctionMethod == "fdr")   params$correctionMethod = "FDR"
-	else stop (paste0 ("Unknown correction method: ", params$correctionMethod), call.=T)
+	else stop (paste0 ("MG Error: Unknown correction method: ", params$correctionMethod), call.=T)
 	
-	params$gwasModel        = tolower (params$gwasModel) 
-	params$filtering        = ifelse (tolower (params$filtering)=="true", T, F) 
-	params$tools            = tolower (params$tools) 
-	params$geneAction       = tolower (params$geneAction) 
+	params$gwasModel   = tolower (params$gwasModel) 
+	params$filtering   = ifelse (tolower (params$filtering)=="true", T, F) 
+	params$tools       = tolower (params$tools) 
+	params$geneAction  = tolower (params$geneAction) 
 
 	`%notin%` <- Negate(`%in%`)
 
-	# Check possible errors in ploidy and input files
-	if (params$ploidy %notin% c("2", "4"))   stop ("Ploidy not supported")
-	if (!file.exists (params$genotypeFile))  {
-		errorMessage = paste0 ("Genotype file not found: ", getwd(),"--", params$genotypeFile)
-		stop (errorMessage, call.=T)
-	}
+	# Check possible errors in ploidy 
+	if (params$ploidy %notin% c("2", "4"))   stop ("MG Error: Ploidy not supported")
 
-	if (!file.exists (params$phenotypeFile))  {
-		errorMessage = paste0 ("Phenotype file not found: ", params$phenotypeFile)
-		stop (errorMessage, call.=T)
-	}
-
-	if (params$genotypeFormat %in% c("kmatrix", "fitpoly")) {
-		if (is.null (params$mapFile))      stop ("Map file needed in configuration fil")
-		if (!file.exists (params$mapFile)) stop ("Map file not found")
-	}
-
-
-	# Print params file
-	msgmsg ("-----------------------------------------------------------")
-	msgmsg ("Summary of configuration parameters:")
-	msgmsg ("-----------------------------------------------------------")
-	for (i in 1:length (params)) {
-		msgmsg (sprintf ("%-18s : %s", names (params[i]), if (is.null (params [i][[1]])) "NULL" else params [i][[1]]    ))
-	}
-	msgmsg ("-----------------------------------------------------------")
-
-	# Create output dir for this project
+	# Create output dir, check input files, and copy files to output dir
 	outDir   = paste0 ("out-", strsplit (paramsFile, split="[.]") [[1]][1])
 	createDir (outDir)
+	if (!file.exists (params$genotypeFile)) 
+		stop (sprintf ("MG Error: Genotype file not found: '%s'", params$genotypeFile), call.=T)
 	runCommand(sprintf ("cp %s %s", params$genotypeFile, outDir))
-	runCommand(sprintf ("cp %s %s", params$phenotypeFile, outDir))
-	print (params$genotypeFormat)
-	if (params$genotypeFormat %in% c("kmatrix", "fitpoly")) 
-		runCommand(sprintf ("cp %s %s", params$mapFile, outDir))
+	params$genotypeFile  = basename (params$genotypeFile)
 
-	# Change to the working dir of the main projet 
+	if (!file.exists (params$phenotypeFile)) 
+		stop (sprintf ("MG Error: Phenotype file not found: '%s'", params$phenotypeFile), call.=T)
+	runCommand(sprintf ("cp %s %s", params$phenotypeFile, outDir))
+	params$phenotypeFile = basename (params$phenotypeFile)
+
+	if (params$genotypeFormat %in% c("kmatrix", "fitpoly", "updog")) {
+		if (is.null (params$mapFile) | !file.exists (params$mapFile))      
+			stop ("MG Error: Map file not found or not specified in the config file", call.=T)
+		file.copy (params$mapFile, outDir)
+		params$mapFile = basename (params$mapFile)
+	}
+	# Change to the output dir 
 	setwd (outDir)
 	
 	# Create params files for each trait
@@ -300,10 +286,14 @@ moveOutFiles <- function (outputDir, reportDir)
 # Convert geno an pheno to other tool formats 
 #-------------------------------------------------------------
 genoPhenoMapProcessing <- function (genotypeFile, genotypeFormat, phenotypeFile, mapFile, config) {
+	print (genotypeFile)
+	print (phenotypeFile)
+	print (mapFile)
 	# Convert to gwaspoly format from other formats: VCF, GWASpoly, k-matrix, or fitPoly.
-	genotypeFile  = genotypeProcessing (genotypeFile, genotypeFormat, mapFile, config$ploidy)
+	genotypeFile  = convertGenotypeToGWASpolyFormat (genotypeFile, genotypeFormat, mapFile, config$ploidy)
 
 	# Filter by valid markers (alleles lenght, call rate SNPs and Samples)
+	msgmsg ("Checking valid markers...")
 	validGenotype = filterByValidMarkers (genotypeFile, config$ploidy, config$GENO, config$MIND)
 
 	# Filter by common markers, samples and remove duplicated and NA phenos
@@ -362,11 +352,79 @@ genoPhenoMapProcessing <- function (genotypeFile, genotypeFormat, phenotypeFile,
 
 	return (list (genotypeFile=genotypeFile, phenotypeFile=phenotypeFile, trait=common$trait))
 }
+
+#-------------------------------------------------------------
+# Check valid markers: 
+#   alleles length==ploidy, proportion of NAs in marker and samples (call rate),
+#   chromosomes names as number, and sorted by chromosome and position
+#-------------------------------------------------------------
+filterByValidMarkers <- function (genotypeFile, ploidy, callRateSNPs, callRateSamples) {
+	geno                = read.csv (file=genotypeFile, check.names=F)
+	allelesGeno         = as.matrix(geno[,-(1:3)])
+
+	map                 = geno [,1:3]
+	sampleNames         = colnames (geno[,-(1:3)])
+	markerNames         = geno [1,]
+	rownames(allelesGeno) = geno[,1]
+
+	# Return NA if lenght of alleles is < ploidy
+	setNAs <- function (alleles, ploidy) {
+		if (is.na (alleles) || nchar (alleles) < ploidy)
+			return (NA)
+		return (alleles)
+	}
+	allelesList = unlist (mclapply (allelesGeno,  setNAs, ploidy, mc.cores=NCORES))
+	allelesMat  = matrix (allelesList, nrow=nrow(allelesGeno), ncol=ncol(allelesGeno))
+	colnames (allelesMat) = colnames (allelesGeno)
+	validGeno = cbind (map, allelesMat)
+	validFile   = addLabel (genotypeFile, "VALIDSNPs")
+	write.csv (validGeno, validFile, quote=F, row.names=F)
+
+	# Check call rate of samples and markers
+	calcPropNAs <- function (alleles) {
+		prop = sum (is.na (alleles)) / length (alleles)
+		return (prop)
+	}
+	propsSNPs    = apply (allelesMat, 1, calcPropNAs)
+	propsSamples = apply (allelesMat, 2, calcPropNAs)
+	badSNPs      = which (propsSNPs > callRateSNPs)
+	badSamples   = which (propsSamples > callRateSamples)
+	if (length (badSNPs) > 0) {
+		map        = map [-badSNPs,]
+		allelesMat = allelesMat [-badSNPs,]
+	}
+	if (length (badSamples) > 0) 
+		allelesMat = allelesMat [, -badSamples]
+
+	# Check and convert chromosome text names to numbers using factos
+	anyNonNumericChrom <- function (chrs) {
+		suppressWarnings (any (is.na (as.numeric (chrs))))
+	}
+
+	chrs = as.character (map [,2])
+	if  (anyNonNumericChrom (chrs)==TRUE) {
+		msgmsg ("!!!Mapping chromosome names to numbers (see 'out-mapped-chromosome-names.csv') file...")
+		chrs            = as.factor (chrs)
+		levels (chrs)   = 1:length (levels (chrs))
+		write.csv (data.frame (ORIGINAL_CHROM=map[,2], NEW_CHROM=chrs), "out-mapped-chromosome-names.csv", quote=F, row.names=F)
+		map [,2] = chrs
+	}
+
+	#callRateGeno = cbind (map [-badSNPs,], allelesMat [-badSNPs, -badSamples])
+	# Create final matrix and sort by chromosome and position
+	callRateGeno = cbind (map, allelesMat)
+	callRateGeno = callRateGeno [order (callRateGeno[,2], callRateGeno[,3]),]
+
+	callRateFile = addLabel (validFile, "NOMISSINGSNPs")
+	write.csv (callRateGeno, callRateFile, quote=F, row.names=F)
+
+	return (callRateFile)
+}
 #-------------------------------------------------------------
 # Return the format type of genotype
 # Checks if VCF, GWASpoly(k-matrix-chrom-pos), k-matrix, and fitPoly
 #-------------------------------------------------------------
-genotypeProcessing <- function (genotypeFile, type, mapFile, ploidy) {
+convertGenotypeToGWASpolyFormat <- function (genotypeFile, type, mapFile, ploidy) {
 	msg ("Processing genotype file format...")
 
 	if (type=="gwaspoly"){
@@ -374,19 +432,18 @@ genotypeProcessing <- function (genotypeFile, type, mapFile, ploidy) {
 		newGenotypeFile = genotypeFile
 
 	}else if (type=="kmatrix") {# Only for tetraploids
-		msgmsg ("Converting kmatrix gwaspoly genotype...")
+		msgmsg ("Creating GWASpoly genotype from k-matrix genotype...")
 		newGenotypeFile = createGwaspolyGenotype (genotypeFile, mapFile)
 
 	}else if (type=="vcf") {
-		msgmsg ("Converting VCF genotype ...")
+		msgmsg ("Converting VCF genotype...")
 		newGenotypeFile = convertVCFToACGTByNGSEP (genotypeFile) #output: filename.csv
-		message (">>>>")
-		message (newGenotypeFile)
-		message (">>>>")
-
 	}else if (type=="fitpoly"){
+		msgmsg ("Converting fitPoly genotype... ")
 		newGenotypeFile = convertFitpolyToGwaspolyGenotype (genotypeFile, mapFile) #output: filename.csv
-
+	}else if (type=="updog"){
+		msgmsg ("Converting Updog genotype... ")
+		newGenotypeFile = convertUpdogToGwaspolyGenotype (genotypeFile, mapFile) #output: filename.csv
 	}else {
 		msgmsg ("Error: Unknown genotype file format")
 		return (NULL)
@@ -422,7 +479,7 @@ filterByQCFilters <- function (genotypeFile, phenotypeFile, config)
 	####if (!is.null(config$MAF)) cmm=paste (cmm, paste ("--maf", config$MAF))
 
 	# Filter SNPs which are not in Hardy-Weinberg equilibrium (HWE).
-	if (!is.null(config$HWE)) cmm=paste (cmm, paste ("--hwe", config$HWE))
+	#if (!is.null(config$HWE)) cmm=paste (cmm, paste ("--hwe", config$HWE))
 
 	# Recode to plink format adjusted for tassel and plink
 	runCommand (cmm, "log-filtering.log" )
@@ -497,8 +554,9 @@ impute.mode <- function(x) {
 #-------------------------------------------------------------
 # Calculate threshold to decide SNPs significance
 #-------------------------------------------------------------
-calculateThreshold <- function (level, scores, method="FDR") 
+old_calculateThreshold <- function (level, scores, method="FDR") 
 {
+	print (">>> Threshold m: ", length (scores)); quit()
 	scores <- as.vector(na.omit (scores))
 	m <- length(scores)
 	if (method=="Bonferroni") 
@@ -558,22 +616,6 @@ calculateThreshold <- function (level, scores, method="FDR")
         }
         return(qvalue)
     }
-#-------------------------------------------------------------
-# If genotype is VCF, convert to ACGT kmatrix (.csv)
-#-------------------------------------------------------------
-convertGenotypeVCFtoACGT <- function (genotypeFile) {
-	msgmsg ("Checking genotype file format...")
-
-	con = file(genotypeFile,"r")
-	firstLine = readLines (con, n=1)
-	close (con)
-
-	if (grepl ("VCF", firstLine)) {
-		msgmsg ("Converting VCF genotype to k-matrix genotype (.csv)")
-		genotypeFile = convertVCFToACGTByNGSEP (genotypeFile) #output: filename.csv
-	}
-	return (genotypeFile)
-}
 
 #-------------------------------------------------------------
 # Get common sample names
@@ -605,7 +647,7 @@ filterByCommonMarkersSamples <- function (genotypeFile, phenotypeFile, mapFile=N
 	write.csv (file=genoCommonFile, genoCommon, quote=F, row.names=F)
 	write.csv (file=phenoCommonFile, phenoCommon, quote=F, row.names=F)
 
-	return (list (genotypeFile=genoCommonFile, phenotypeFile=phenoCommonFile, trait=trait))
+	return (list (genotypeFile=genoCommonFile, phenotypeFile=phenoCommonFile, trait=trait, genotype=genoCommon))
 }
 #-------------------------------------------------------------
 # Impute, filter by MAF, unify geno and pheno names
@@ -614,6 +656,9 @@ filterByCommonMarkersSamples <- function (genotypeFile, phenotypeFile, mapFile=N
 filterByMAF <- function(genotypeFile, ploidy, thresholdMAF){
 	msgmsg ("Reading phenotype for MAF processing....")
 	if (is.null (thresholdMAF)) thresholdMAF = 0.0
+
+	#print (thresholdMAF);quit()
+	thresholdMAF = 0.0
 
 	geno              <- read.csv(genotypeFile,check.names=F, as.is=T)
 	gid.geno          <- colnames(geno)[-(1:3)]
@@ -870,14 +915,14 @@ createDir <- function (newDir) {
 #-------------------------------------------------------------
 withCallingHandlers (
 	main (), 
-	error = function (e) { 
-		if (DEBUG){
-			print (geterrmessage ())
-			print (sys.calls()[-1])
-			quit ()
-		}
-	},
 	warning = function (w) { 
 		message (geterrmessage ())
+	},
+	error = function (e) { 
+			msg = geterrmessage ()
+			message (msg)
+			if (!grepl ("MG Error:", msg))
+				message (paste (head (sys.calls()[-1],-2), " "))
+			quit ()
 	}
 )
