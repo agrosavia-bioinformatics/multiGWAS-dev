@@ -11,6 +11,7 @@ if (DEBUG) {SILENT <- FALSE;options (warn=2)}
 # AUTHOR: Luis Garreta (lgarreta@agrosavia.co) 
 # DATE  : 12/feb/2020
 # LOGS  :   
+	# r1.8: Add linkage disequilibrium analysis
 	# r1.5: Using VCF files
 	# r1.3: Added column gene action model to tables of results by tool
 	# r1.2: Separate SHEsis/Plink Kinship. Reduced code (runGWAStools, ped, bed)
