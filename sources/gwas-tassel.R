@@ -72,7 +72,10 @@ runToolTassel <- function (params) {
 		gnrTable <- createTableTassel (results, "dominant", "dom_p")
 		scoresTableAll <- rbind (addTable, domTable, gnrTable)
 	}
-	write.table (file=scoresFile, scoresTableAll, quote=F, sep="\t", row.names=F)
+	colnames (scoresTableAll)[colnames(scoresTableAll) %in% c("Chr","Pos")] = c ("CHR","POS")
+	write.table (scoresTableAll, scoresFile, quote=F, sep="\t", row.names=F)
 	msg ("... Ending TASSEL")
+
+	return (list (tool="TASSEL", scoresFile=scoresFile, scores=scoresTableAll))
 }
 

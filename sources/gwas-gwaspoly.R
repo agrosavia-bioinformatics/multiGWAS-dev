@@ -41,7 +41,7 @@ main <- function () {
 # Set parameters and run GWASpoly tool
 #-------------------------------------------------------------
 runToolGwaspoly <- function (params) {
-	msgmsg("Running GWASpoly...")
+	msgmsg("Running GWASpoly GWAS...")
 
 	scoresFile = paste0 ("out/tool-GWASpoly-scores-", params$gwasModel, ".csv")
 
@@ -76,14 +76,22 @@ runToolGwaspoly <- function (params) {
 	# GWAS execution
 	data3 <- runGwaspoly (data2, params, NCORES) 
 						  #params$gwasModel, params$snpModels,params$correctionMethod )
-	# Get SNP associations
-	scoresTable  = getQTLGWASpoly (data3, params$gwasModel, params$ploidy)
-	write.table (file=scoresFile, scoresTable, quote=F, sep="\t", row.names=F)
 
+	# Show results in GWASpoly way
 	msgmsg ("    >>>> GWASpoly showResults...")
-	showResults (data3, params$snpModels, params$trait, params$gwasModel, 
-				 params$phenotypeFile, params$ploidy)
+	showResults (data3, params$snpModels, params$trait, params$gwasModel,params$phenotypeFile, params$ploidy)
 	msg ("...Ending GWASpoly")
+
+	# Get SNP associations
+	scores  = getQTLGWASpoly (data3, params$gwasModel, params$ploidy)
+	colnames (scores)[colnames(scores) %in% c("Chrom","Position")] = c ("CHR","POS")
+
+	scoresColumns = c("MODEL", "GC", "Marker", "CHR", "POS", "P", "SCORE", "THRESHOLD", "DIFF")
+	scores <- data.frame (scores[,scoresColumns], scores [,setdiff (colnames(scores), scoresColumns)])
+
+	write.table (file=scoresFile, scores, quote=F, sep="\t", row.names=F)
+
+	return (list (tool="GWASpoly", scoresFile=scoresFile, scores=scores))
 }
 
 #-------------------------------------------------------------

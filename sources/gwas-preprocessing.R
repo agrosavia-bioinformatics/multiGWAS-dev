@@ -682,17 +682,17 @@ convertACGTGWASpolyToGenodiveACGTGenotypeFormat <- function (genotypeFile)
 #----------------------------------------------------------
 # Convert gwaspoly genotype from ACGT to numeric format
 #----------------------------------------------------------
-ACGTToNumericGenotypeFormat <- function (genotypeFile, ploidy) 
+ACGTToNumericGenotypeFormat <- function (genotypeFile, ploidy, MAP=F) 
 {
 	NCORES = detectCores()
 	geno = read.csv (file=genotypeFile, header=T, check.names=F)
-	map <- data.frame(Marker=geno[,1],Chrom=factor(geno[,2],ordered=T),Position=geno[,3],stringsAsFactors=F)
 
 	markers           = as.matrix(geno[,-(1:3)])
 	sampleNames       = colnames (geno[,-(1:3)])
 	rownames(markers) = geno[,1]
 			
-	tmp <- apply(markers,1,getReferenceAllele)
+	tmp     <- apply(markers,1,getReferenceAllele)
+	map     <- data.frame(Marker=geno[,1],Chrom=factor(geno[,2],ordered=T),Position=geno[,3],stringsAsFactors=F)
 	map$Ref <- tmp[1,]
 	map$Alt <- tmp[2,]
 
@@ -709,16 +709,20 @@ ACGTToNumericGenotypeFormat <- function (genotypeFile, ploidy)
 	matTransposed   = t(matRefMarkers)
 	ACGTList        = mclapply(seq_len(ncol(matTransposed)), function(i) matTransposed[,i],mc.cores=NCORES)
 	numList         = mclapply(ACGTList, acgtToNum, mc.cores=NCORES)
+	numericMatrixM  = as.data.frame (numList,col.names=rownames (matRefMarkers))
 
-	M = as.data.frame (numList,col.names=rownames (matRefMarkers))
-	tM =  (t(M))
-	colnames (tM) = sampleNames
+	tM              =  (t(numericMatrixM))
+	colnames (tM)   = sampleNames
 
-	newGeno = data.frame (map[,1:3], tM, check.names=F) # Check=FALSE names but not row names
-	newName = paste0 (strsplit (genotypeFile, split="[.]")[[1]][1], "-NUM.tbl")
-	write.csv (file=newName, newGeno, quote=F, row.names=F)
+	newGeno     = data.frame (map[,1:3], tM, check.names=F) # Check=FALSE names but not row names
 
-	return (newName)
+	if (MAP == TRUE)
+		return (list(geno=geno, genoNum=newGeno, map=map))
+	else{
+		newGenoFile = addLabel (genotypeFile, "NUM")
+		write.csv (newGeno, newGenoFile, quote=F, row.names=F)
+		return (newGenoFile)
+	}
 }
 
 #----------------------------------------------------------

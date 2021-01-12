@@ -1,0 +1,38 @@
+PLINK v1.90b6.12 64-bit (28 Oct 2019)
+Options in effect:
+  --all-pheno
+  --allow-extra-chr
+  --allow-no-sex
+  --covar out-PCs.eigenvec
+  --file out/filtered-plink-genotype
+  --linear
+  --out out/tool-PLINK-scores-additive-full
+  --pheno out/filtered-plink-phenotype.tbl
+
+Hostname: agro
+Working directory: /home/lg/agrosavia/GWAS-TOOL/multiGWAS-dev/examples/genoformats/gwaspoly/out-full-tetra-Filters-ADD/tuber_shape
+Start time: Fri Jan  8 23:23:46 2021
+
+Random number seed: 1610166226
+14943 MB RAM detected; reserving 7471 MB for main workspace.
+Scanning .ped file... done.
+Performing single-pass .bed write (2439 variants, 104 people).
+--file: out/tool-PLINK-scores-additive-full-temporary.bed +
+out/tool-PLINK-scores-additive-full-temporary.bim +
+out/tool-PLINK-scores-additive-full-temporary.fam written.
+2439 variants loaded from .bim file.
+104 people (0 males, 0 females, 104 ambiguous) loaded from .fam.
+Ambiguous sex IDs written to out/tool-PLINK-scores-additive-full.nosex .
+104 phenotype values present after --pheno.
+Using 1 thread (no multithreaded calculations invoked).
+--covar: 5 covariates loaded.
+Before main variant filters, 104 founders and 0 nonfounders present.
+Calculating allele frequencies... done.
+Total genotyping rate is 0.972912.
+2439 variants and 104 people pass filters and QC.
+Phenotype data is quantitative.
+104 phenotype values present after --pheno.
+Writing linear model association results to
+out/tool-PLINK-scores-additive-full.TRAIT.assoc.linear ... done.
+
+End time: Fri Jan  8 23:23:46 2021
