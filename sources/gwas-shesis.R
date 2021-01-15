@@ -8,8 +8,8 @@ runToolShesis <- function (params)
 	msgmsg ("Running SHEsis GWAS...")
 
 	geneAction = params$geneAction
-	if (geneAction != "all" & geneAction != "additive")
-		return ()
+	#if (geneAction != "all" & geneAction != "additive")
+	#	return ()
 
 	geneAction = "additive"
 

@@ -122,14 +122,14 @@ mainSingleTrait <- function (traitConfigName) {
 	params$phenotypeFile   = data$phenotypeFile
 	params$trait           = data$trait
 	params$genotypeNumFile = data$genotypeNumFile
+	params$nBest           = as.integer (params$nBest)
 
 	# Run the four tools in parallel
 	listOfResultsFile = runGWASTools (params)
 
 	# Create reports
 	msg ("Creating reports (Table, Venn diagrams, Manhattan&QQ plots, SNP profiles)...")
-	createReports (params$outputDir, params$genotypeFile, params$phenotypeFile, params$genotypeNumFile, params$ploidy,
-				   params$gwasModel, params$reportDir, nBest=as.integer (params$nBest), params$geneAction, listOfResultsFile)
+	createReports (listOfResultsFile, params)
 
 	# Move out files to output dir
 	msg ("Moving files to output folders...")
@@ -172,15 +172,6 @@ readCheckConfigParameters <- function (paramsFile) {
 	params                = config::get (file=paramsFile, config="advanced") 
 	params$paramsFilename = paramsFile
 
-	# Print params file
-	msgmsg ("-----------------------------------------------------------")
-	msgmsg ("Summary of configuration parameters:")
-	msgmsg ("-----------------------------------------------------------")
-	for (i in 1:length (params)) 
-		msgmsg (sprintf ("%-18s : %s", names (params[i]), 
-			if (is.null (params [i][[1]])) "NULL" else params [i][[1]]    ))
-	msgmsg ("-----------------------------------------------------------")
-
 	# Set default values if not set
 	if (is.null (params$geneAction)) params$geneAction = "additive"
 	if (is.null (params$traitType)) params$traitType = "quantitative"
@@ -216,7 +207,7 @@ readCheckConfigParameters <- function (paramsFile) {
 	runCommand(sprintf ("cp %s %s", params$phenotypeFile, outDir))
 	params$phenotypeFile = basename (params$phenotypeFile)
 
-	if (params$genotypeFormat %in% c("kmatrix", "fitpoly", "updog")) {
+	if (tolower (params$genotypeFormat) %in% c("kmatrix", "fitpoly", "updog")) {
 		if (is.null (params$mapFile) | !file.exists (params$mapFile))      
 			stop ("MG Error: Map file not found or not specified in the config file", call.=T)
 		file.copy (params$mapFile, outDir)
@@ -230,11 +221,24 @@ readCheckConfigParameters <- function (paramsFile) {
 	traitList = colnames (phenotype)[-1]
 	traitConfigList = c()
 	for (traitName in traitList) {
+		params$trait = traitName
 		traitConfig     = createTraitConfigFiles (phenotype, traitName, paramsFile, params)
 		traitConfigList = c (traitConfigList, traitConfig)
 	}
 
 	params$traitConfigList = traitConfigList 
+
+	# Print params file
+	msgmsg ("-----------------------------------------------------------")
+	msgmsg ("Summary of configuration parameters:")
+	msgmsg ("-----------------------------------------------------------")
+	for (i in 1:length (params)) 
+		msgmsg (sprintf ("%-18s : %s", names (params[i]), 
+			if (is.null (params [i][[1]])) "NULL" else params [i][[1]]    ))
+	msgmsg ("-----------------------------------------------------------")
+
+
+
 	return (params)
 }
 
@@ -257,19 +261,103 @@ runGWASTools <- function (params) {
 	for (i in 1:length(params$tools)) 
 		msgmsg ("Running ", params$tools [i])
 
-	listOfResultsFile = mclapply (params$tools, runOneTool, params, mc.cores=NCORES, mc.silent=SILENT)
+	listOfResultsFile     = mclapply (params$tools, runOneTool, params, mc.cores=NCORES, mc.silent=SILENT)
 
-	listOfResultsFile = analizeLinkageDisequilibriumSNPsTools (listOfResultsFile, params)
+	listOfResultsFileBest = selectBestGeneActionModelAllTools (listOfResultsFile, params$geneAction, params$nBest)
 
+	listOfResultsFileLD   = analizeLinkageDisequilibriumSNPsTools (listOfResultsFileBest, params)
+
+	return (listOfResultsFileLD)
+}
+
+#-----------------------------------------------------------
+# Select best N SNPs from multiple action models (for GWASpoly and TASSEL)
+# Uses three criteria: best GC, best replicability, and best significants
+# PLINK also can produce info of more action models using options
+#-----------------------------------------------------------
+selectBestGeneActionModelAllTools <- function (listOfResultsFile, geneAction, nBest) {
+	msg ("Selecting best gene action model for all tools...")
+	i = 1
+	for (res in listOfResultsFile) {
+		msgmsg ("Best gene action for: ", res$tool)
+		scoresFileBest = addLabel (res$scoresFile, "BEST")
+		bestScoresTool   = selectBestGeneActionModelTool (res$scores, nBest, res$tool, geneAction)
+		write.table (bestScoresTool, scoresFileBest, sep="\t", quote=F, row.names=F)
+		listOfResultsFile [[i]]$scoresFile = scoresFileBest
+		listOfResultsFile [[i]]$scores     = bestScoresTool
+		i = i + 1
+	}
 	return (listOfResultsFile)
 }
+
+
+selectBestGeneActionModelTool <- function (scoresTool, nBest, tool, geneAction) {
+	if (geneAction %in% c("additive", "dominant", "general") | tool %in% c("SHEsis"))
+		return (scoresTool)
+
+	# Select main columns
+	dataSNPs = scoresTool [,c("Marker","GC","MODEL","SCORE", "THRESHOLD", "DIFF")]; 
+
+	# Order by nBest, DIFF, GC
+	orderedSNPs = dataSNPs [order (dataSNPs$MODEL,-dataSNPs$DIFF),]; 
+
+	for (N in c(200, 100, 50, nBest)) {
+		# Reduce to groups of nBest
+		groupedSNPs = Reduce (rbind, by(orderedSNPs, orderedSNPs["MODEL"], head, n=N)); 
+
+		# Add Count of SNPs between groups
+		countedSNPs   = data.frame (add_count (groupedSNPs, Marker, sort=T, name="nSharedSNPs")); 
+		# Add count of significatives
+		countedSignificantSNPs   = data.frame (add_count (countedSNPs [countedSNPs$DIFF >0, ], MODEL, name="nSign", .drop=F))
+		# Add count of shared SNPs
+		countedSharedSNPs = aggregate (x=countedSNPs$nSharedSNPs, by=list(MODEL=countedSNPs$MODEL, GC=countedSNPs$GC), 	FUN=sum)
+		colnames (countedSharedSNPs) = c("MODEL", "GC", "SHAREDNSPS")
+
+		# Summ differences
+		#summMdlDiff = aggregate (x=countedSNPs$DIFF, by=list(MODEL=countedSNPs$MODEL, GC=countedSNPs$GC), 	FUN=sum)
+
+		# Add fraction of shared SNPs between all models
+		summMdlSign = cbind (countedSharedSNPs, nSIGN=0)
+		rownames (summMdlSign) = summMdlSign [,1]
+
+		if (length (countedSignificantSNPs$nSharedSNPs)==0)
+			summMdlSign [as.character (countedSignificantSNPs$MODEL),"nSIGN"] = 0
+		else
+			summMdlSign [as.character (countedSignificantSNPs$MODEL),"nSIGN"] = countedSignificantSNPs$nSharedSNPs / sum (countedSignificantSNPs$nSharedSNPs)
+
+		#summMdlSign [as.character (countedSignificantSNPs$MODEL),"nSIGN"] = ifelse(countedSignificantSNPs$nSharedSNPs==0, 0, countedSignificantSNPs$nSharedSNPs / sum (countedSignificantSNPs$nSharedSNPs))
+			
+		# Calculate best model score
+		totalNs     = length (summMdlSign$MODEL) * N
+		scoreGC     = 1 - abs (1-summMdlSign$GC)
+		scoreShared = summMdlSign$SHAREDNSPS/totalNs  
+		scoreSign   = summMdlSign$nSIGN 
+
+		modelScore  = scoreGC + scoreShared + scoreSign
+		summScores  = cbind (countedSharedSNPs, scoreGC, scoreShared, scoreSign, score=modelScore)
+		summScores  = summScores [order (summScores$score, summScores$MODEL, decreasing=T),]
+
+		outFilename = addLabel ("out/tmp-bestModel.csv", sprintf ("%s-%0.3d", tool, N))
+		#outFilename = paste0 ("report/model-scores-", tool, "-", sprintf ("%0.3d", N), ".csv")
+		write.csv (summScores, file=outFilename, quote=F, row.names=F)
+	}
+
+	bestModel = summScores [1, "MODEL"]
+
+	# Select SNPs for model and sort by DIFF
+	bestScoresTool = scoresTool [scoresTool[,"MODEL"] %in% bestModel,]
+	bestScoresTool = bestScoresTool [order (-bestScoresTool$DIFF),]
+
+	return (bestScoresTool)
+}
+
 
 #-------------------------------------------------------
 # Analyze Linkage Disequilibrium for SNPs of each tool
 # SNPs in high LD are removed from their resulting scores
 #-------------------------------------------------------
 analizeLinkageDisequilibriumSNPsTools <- function (listOfResultsFile, params) {
-	message (">>>> Analyzing linkage disequilibrium for SNPs in each tool...")
+	msg ("Analyzing linkage disequilibrium for SNPs in each tool...")
 	# Create table with all scores
 	scoresAll = NULL
 	for (res in listOfResultsFile) {
@@ -281,7 +369,7 @@ analizeLinkageDisequilibriumSNPsTools <- function (listOfResultsFile, params) {
 	'%ni%' <- Negate('%in%')
 	for (res in listOfResultsFile) { 
 		scoresTool = filter (scoresAll, TOOL==res$tool)
-		snpsLD = matchSNPsByLDSingleTool (params$genotypeNumFile, scoresTool, 0.99, params$nBest)
+		snpsLD = matchSNPsByLDSingleTool (params$genotypeNumFile, scoresTool, 0.99, params$nBest, res$tool)
 		scoresAll = scoresAll [scoresAll$Marker %in% setdiff (scoresAll$Marker, snpsLD),]
 	}
 
@@ -301,7 +389,7 @@ analizeLinkageDisequilibriumSNPsTools <- function (listOfResultsFile, params) {
 #-----------------------------------------------------------------------
 # Return a vector of SNPs in high LD
 #-----------------------------------------------------------------------
-matchSNPsByLDSingleTool <- function (genoNumFile, scores, maxLD, maxBest) {
+matchSNPsByLDSingleTool <- function (genoNumFile, scores, maxLD, maxBest, tool) {
 	if (!exists ("genotypeNum")) 
 		genotypeNum    <<- read.csv (genoNumFile, row.names=1);
 
@@ -321,7 +409,7 @@ matchSNPsByLDSingleTool <- function (genoNumFile, scores, maxLD, maxBest) {
 	snpsLD = c()
 	while (i <= nrow (ldMatrix)) {
 		if (ldMatrix[i,"r2"] > maxLD) {
-			msgmsg (sprintf ("SNPs in high LD: %s and %s with R2=%s", ldMatrix[i,"snpi"], ldMatrix[i,"snpj"], ldMatrix[i,"r2"]))
+			msgmsg (sprintf ("SNPs of %s in high LD: %s and %s with R2=%s", tool,  ldMatrix[i,"snpi"], ldMatrix[i,"snpj"], ldMatrix[i,"r2"]))
 			snpj     = ldMatrix [i, "snpj"]
 			ldMatrix = ldMatrix [ldMatrix$snpi != snpj,]
 			snpsLD   = c(snpsLD, snpj)
@@ -615,29 +703,6 @@ impute.mode <- function(x) {
 		x[ix] <- as.integer(names(which.max(table(x))))
 	}
 	return(x)
-}
-#-------------------------------------------------------------
-# Calculate threshold to decide SNPs significance
-#-------------------------------------------------------------
-old_calculateThreshold <- function (level, scores, method="FDR") 
-{
-	print (">>> Threshold m: ", length (scores)); quit()
-	scores <- as.vector(na.omit (scores))
-	m <- length(scores)
-	if (method=="Bonferroni") 
-		threshold <- -log10(level/m)
-	else if (method=="FDR") {
-		tmp <- cbind(10^(-scores),.qvalue(10^(-scores)))
-		tmp <- tmp[order(tmp[,2]),]
-		if (tmp[1,2] > level) {
-			threshold <- -log10(tmp[1,1])*1.2
-		} else {
-			k <- max(which(tmp[,2] < level))
-			threshold <- -log10(mean(tmp[k:(k+1),1]))
-		}
-	}
-
-	return (threshold)
 }
 
 .qvalue <- function(p) {
