@@ -15,7 +15,7 @@ HOME = Sys.getenv ("MULTIGWAS_HOME")
 suppressMessages (library (dplyr))
 suppressMessages (library (qqman))
 suppressMessages (library (VennDiagram))
-suppressMessages (library (config))          # For read config file
+suppressMessages (library (yaml))          # For read config file
 suppressMessages (library ("RColorBrewer"))  # For chord diagrams
 suppressMessages (library(circlize))         # For chord diagrams
 suppressMessages (library (doParallel))
@@ -150,30 +150,6 @@ createMarkdownReport  <- function (config) {
 }
 
 
-#-------------------------------------------------------------
-# Calculate the inflation factor from -log10 values
-# It can fire warning, here they are hidign
-#-------------------------------------------------------------
-calculateInflationFactor <- function (scores)
-{
-	oldw <- getOption("warn")
-	options(warn = -1)
-
-	remove <- which(is.na(scores))
-	if (length(remove)>0) 
-		x <- sort(scores[-remove],decreasing=TRUE)
-	else 
-		x <- sort(scores,decreasing=TRUE)
-
-	pvalues = 10^-x
-	chisq <- na.omit (qchisq(1-pvalues,1))
-	delta  = round (median(chisq)/qchisq(0.5,1), 3)
-
-	options (warn = oldw)
-
-	return (list(delta=delta, scores=x))
-}
-
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
 markersManhattanPlots <- function (listOfResultsFile, commonBest, snpTables, nBest, geneAction) {
@@ -208,7 +184,7 @@ markersManhattanPlots <- function (listOfResultsFile, commonBest, snpTables, nBe
 		else
 			signThresholdScore = ceiling (data[1, "SCORE"]) 
 
-		bestSNPsTool     = unlist (select (filter (snpTables$best, TOOL==tool), "SNP"))
+		bestSNPsTool     = unlist (dplyr::select (filter (snpTables$best, TOOL==tool), "SNP"))
 		sharedSNPs       = intersect (commonBest, bestSNPsTool)
 		colorsBlueOrange = c("blue4", "orange3")
 		ylims   = c (0, ceiling (signThresholdScore))
@@ -287,69 +263,6 @@ qqMGWAS <- function(gwasResults, geneAction) {
 	legend ("bottomright", lty=1, legend=LEGEND, col=colors, pch=16) 
 }
 
-#-----------------------------------------------------------
-# Select best N SNPs from multiple action models (for GWASpoly and TASSEL)
-# Uses three criteria: best GC, best replicability, and best significants
-# PLINK also can produce info of more action models using options
-#-----------------------------------------------------------
-selectBestModel <- function (data, nBest, tool, geneAction) {
-	if (tool!="SHEsis")
-		return (data)
-
-	if (geneAction!="all")
-		return (data)
-
-	# Select main columns
-	dataSNPs = data [,c("Marker","GC","MODEL","SCORE", "THRESHOLD", "DIFF")]; 
-
-	# Order by nBest, DIFF, GC
-	orderedDataSNPs = dataSNPs [order (dataSNPs$MODEL,-dataSNPs$DIFF),]; 
-
-	for (N in c(200, 100, 50, nBest)) {
-		# Reduce to groups of nBest
-		groupsDataSNPs = Reduce (rbind, by(orderedDataSNPs, orderedDataSNPs["MODEL"], head, n=N)); 
-
-		# Add Count of SNPs between groups
-		summ   = data.frame (add_count (groupsDataSNPs, Marker, sort=T, name="nSharedSNPs")); 
-
-		# Add count of significatives
-		summSign   = data.frame (add_count (summ [summ$DIFF >0, ], MODEL, name="nSign"))
-
-		# Add count of shared SNPs
-		summMdl = aggregate (x=summ$nSharedSNPs, by=list(MODEL=summ$MODEL, GC=summ$GC), 	FUN=sum)
-		colnames (summMdl) = c("MODEL", "GC", "SHAREDNSPS")
-
-		# Summ differences
-		#summMdlDiff = aggregate (x=summ$DIFF, by=list(MODEL=summ$MODEL, GC=summ$GC), 	FUN=sum)
-
-		# Add fraction of shared SNPs between all models
-		summMdlSign = cbind (summMdl, nSIGN=0)
-		rownames (summMdlSign) = summMdlSign [,1]
-		summMdlSign [as.character (summSign$MODEL),"nSIGN"] = ifelse(summSign$nSharedSNPs==0, 0, summSign$nSharedSNPs / sum (summSign$nSharedSNPs))
-			
-		# Calculate best model score
-		totalNs     = length (summMdlSign$MODEL) * N
-		scoreGC     = 1 - abs (1-summMdlSign$GC)
-		scoreShared = summMdlSign$SHAREDNSPS/totalNs  
-		scoreSign   = summMdlSign$nSIGN 
-
-		modelScore  = scoreGC + scoreShared + scoreSign
-		summScores  = cbind (summMdl, scoreGC, scoreShared, scoreSign, score=modelScore)
-		summScores  = summScores [order (summScores$score, summScores$MODEL, decreasing=T),]
-
-		outFilename = paste0 ("report/model-scores-", tool, "-", sprintf ("%0.3d", N), ".csv")
-		write.csv (summScores, file=outFilename, quote=F, row.names=F)
-	}
-
-	bestModel = summScores [1, "MODEL"]
-
-	# Select SNPs for model and sort by DIFF
-	dataModel = data [data[,"MODEL"] %in% bestModel,]
-	dataModel = dataModel [order (-dataModel$DIFF),]
-
-	return (dataModel)
-}
-
 #------------------------------------------------------------------------
 # Create Venn diagram of common markers using info from summary table
 #------------------------------------------------------------------------
@@ -369,8 +282,8 @@ markersVennDiagrams <- function (listOfResultsFile, summaryTable, gwasModel, sco
 		toolNames = c()
 		for (resultsFile in listOfResultsFile) {
 			toolNames  = c (toolNames, resultsFile$tool)
-			markers    = summaryTable %>% filter (TOOL %in% resultsFile$tool) %>% select (SNP) %>% .$SNP
-			x          = append (x, list (as.character (markers)))
+			markers = dplyr::select (filter (summaryTable, TOOL %in% resultsFile$tool), SNP) %>% .$SNP %>% as.character
+			x          = append (x, list (markers))
 		}
 		names (x) = toolNames
 		nTools = length (x)
@@ -396,10 +309,12 @@ markersVennDiagrams <- function (listOfResultsFile, summaryTable, gwasModel, sco
 		}
 
 		# Get shared SNPs
+		message (" Getting shared SNPs...")
 		dataSNPsNs     = data.frame (add_count (summaryTable, SNP, sort=T)); 
 		dataSNPsShared = dataSNPsNs[dataSNPsNs$n > 1,]
 		dataSNPsNoDups = dataSNPsShared [!duplicated (dataSNPsShared$SNP),]
 		sharedSNPs     = dataSNPsNoDups$SNP
+		message (" >>> Getting shared SNPs...")
 	}
 
 	png (paste0 (outFile,".png"), width=WIDTH, height=HEIGHT, units="in", res=120)
@@ -493,28 +408,29 @@ matchSNPsByLDAllTools <- function (genotypeFile, scores, maxLD) {
 # Get params from config file and define models according to ploidy
 #-------------------------------------------------------------
 writeConfigurationParameters <- function (inputDir, outputDir) {
-	configFile = paste0(inputDir, list.files (inputDir, pattern="config")[1])
-	config     = config::get (file=configFile) 
+	paramsFile = paste0(inputDir, list.files (inputDir, pattern="config")[1])
+	#params     = params::get (file=paramsFile) 
+	params     = yaml.load_file (paramsFile, merge.precedence="order") 
 
 	configDF = data.frame (PARAMETER=character(), VALUE=character ())
-	configDF = rbind  (configDF, data.frame (PARAMETER="Ploidy (4 or 2)", VALUE=toString (config$ploidy)))
-	configDF = rbind  (configDF, data.frame (PARAMETER="Genotype filename", VALUE=toString (config$genotypeFile)))
-	configDF = rbind  (configDF, data.frame (PARAMETER="Phenotype filename", VALUE=toString (config$phenotypeFile)))
-	configDF = rbind  (configDF, data.frame (PARAMETER="Significance level (Genome-wide significance level)", VALUE=toString (config$significanceLevel)))
-	configDF = rbind  (configDF, data.frame (PARAMETER="Correction method (Bonferroni or FDR)", VALUE=toString (config$correctionMethod)))
-	configDF = rbind  (configDF, data.frame (PARAMETER="GWAS model (Full or Naive)", VALUE=toString (config$gwasModel)))
-	configDF = rbind  (configDF, data.frame (PARAMETER="nBest (Number of best-ranked SNPs to be reported)", VALUE=toString (config$nBest)))
-	configDF = rbind  (configDF, data.frame (PARAMETER="Filtering (TRUE or FALSE)", VALUE=toString (config$filtering)))
-	configDF = rbind  (configDF, data.frame (PARAMETER="MIND Filter (Individual with missing genotype)", VALUE=toString (config$MIND)))
-	configDF = rbind  (configDF, data.frame (PARAMETER="GENO Filter (SNPs with missing genotype)", VALUE=toString (config$GENO)))
-	configDF = rbind  (configDF, data.frame (PARAMETER="MAF Filter (Minor allele frequency)", VALUE=toString (config$MAF)))
-	configDF = rbind  (configDF, data.frame (PARAMETER="HWE Filter (Hardy-Weinberg test)", VALUE=toString (config$HWE)))
-	configDF = rbind  (configDF, data.frame (PARAMETER="GWAS Tools", VALUE=toString (config$tools)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="Ploidy (4 or 2)", VALUE=toString (params$ploidy)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="Genotype filename", VALUE=toString (params$genotypeFile)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="Phenotype filename", VALUE=toString (params$phenotypeFile)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="Significance level (Genome-wide significance level)", VALUE=toString (params$significanceLevel)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="Correction method (Bonferroni or FDR)", VALUE=toString (params$correctionMethod)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="GWAS model (Full or Naive)", VALUE=toString (params$gwasModel)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="nBest (Number of best-ranked SNPs to be reported)", VALUE=toString (params$nBest)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="Filtering (TRUE or FALSE)", VALUE=toString (params$filtering)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="MIND Filter (Individual with missing genotype)", VALUE=toString (params$MIND)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="GENO Filter (SNPs with missing genotype)", VALUE=toString (params$GENO)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="MAF Filter (Minor allele frequency)", VALUE=toString (params$MAF)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="HWE Filter (Hardy-Weinberg test)", VALUE=toString (params$HWE)))
+	configDF = rbind  (configDF, data.frame (PARAMETER="GWAS Tools", VALUE=toString (params$tools)))
 
 	outName = paste0(outputDir, "/out-multiGWAS-inputParameters.tbl")
 	write.table (file=outName, configDF, quote=F, sep="\t", row.names=F)
-	config$workingDir = getwd ()
-	return (config)
+	params$workingDir = getwd ()
+	return (params)
 }
 
 #-----------------------------------------------------------
@@ -635,35 +551,6 @@ view <- function (data, m=10,n=10, tool="") {
 		print (data [1:m, 1:n])
 
 	write.table (file=filename, data, quote=F, sep="\t", row.names=F)
-}
-#-------------------------------------------------------------
-# Print a log message with the parameter
-#-------------------------------------------------------------
-msgmsg <- function (...) {
-		messages = unlist (list (...))
-		cat (">>>>", messages, "\n")
-}
-
-msgError <- function (...) {
-		messages = unlist (list (...))
-		cat (strrep("-", sum(sapply(messages, nchar))),"\n")
-		cat (messages, "\n")
-		cat (strrep("-", sum(sapply(messages, nchar))),"\n")
-}
-
-
-#-------------------------------------------------------------
-# Add label to filename
-#-------------------------------------------------------------
-addLabel <- function (filename, label, newExt=NULL)  {
-	nameext = strsplit (filename, split="[.]")
-	name    = nameext [[1]][1] 
-	if (is.null (newExt))
-		ext     = nameext [[1]][2] 
-	else
-		ext     = newExt
-	newName = paste0 (nameext [[1]][1], "-", label, ".", ext )
-	return (newName)
 }
 
 #----------------------------------------------------------

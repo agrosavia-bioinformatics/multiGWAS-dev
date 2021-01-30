@@ -45,12 +45,12 @@ runToolGwaspoly <- function (params) {
 
 	scoresFile = paste0 ("out/tool-GWASpoly-scores-", params$gwasModel, ".csv")
 
-	# Set gene action models (all or specific ones)
+	# Set gene action models (automatic or specific ones)
 	modelsDiplo  = c ("general","additive","diplo-general", "diplo-additive", "1-dom")
 	modelsTetra  = c (modelsDiplo, "2-dom")
 
 	# Default models whether diplo or tetra 
-	if (params$geneAction=="all")
+	if (params$geneAction %in% c("all","automatic"))
 		if (params$ploidy == 4) 
 			snpModels = modelsTetra
 		else

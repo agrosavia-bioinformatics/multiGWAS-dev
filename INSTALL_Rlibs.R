@@ -38,7 +38,7 @@ message ("\n\nInstalling R libraries...\n\n")
 
 if (!require("pacman")) install.packages('pacman', lib=libpath, repos='http://cran.us.r-project.org')
 
-pacman::p_load("rrBLUP", "parallel","config","dplyr","stringi","qqman","VennDiagram","RColorBrewer","circlize","gplots", "rmarkdown", "kableExtra") 
+pacman::p_load("rrBLUP", "parallel","config","dplyr","stringi","qqman","VennDiagram","RColorBrewer","circlize","gplots", "rmarkdown", "kableExtra" ,"doParallel", "ldsep") 
 
 if (!require("GWASpoly")) install.packages('opt/GWASpoly_1.3.tar.gz', lib=libpath, repos=NULL, type="source")
 

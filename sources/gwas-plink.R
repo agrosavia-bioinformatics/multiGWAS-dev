@@ -20,18 +20,18 @@ runToolPlink <- function (params, tmpId="") {
 	outFile = sprintf ("out/tool-PLINK-scores-%s%s", params$gwasModel, tmpId)
 
 	if (params$geneAction=="additive")
-		scores = runPlinkCommand (params, '', outFile, tmpId)
+		scores = runPlink (params, '', outFile, tmpId)
 	else if (params$geneAction=="general")
-		scores = runPlinkCommand (params, "genotypic", outFile)
+		scores = runPlink (params, "genotypic", outFile)
 	else if (params$geneAction=="dominant") {
-		recScores = runPlinkCommand (params, "recessive", outFile)
-		domScores = runPlinkCommand (params, "dominant", outFile)
+		recScores = runPlink (params, "recessive", outFile)
+		domScores = runPlink (params, "dominant", outFile)
 		scores     = rbind (recScores, domScores)
-	}else if (params$geneAction=="all") {
-		addScores = runPlinkCommand (params, '', outFile)
-		gnrScores = runPlinkCommand (params, "genotypic", outFile)
-		recScores = runPlinkCommand (params, "recessive", outFile)
-		domScores = runPlinkCommand (params, "dominant", outFile)
+	}else if (params$geneAction %in% c("all", "automatic")) {
+		addScores = runPlink (params, '', outFile)
+		gnrScores = runPlink (params, "genotypic", outFile)
+		recScores = runPlink (params, "recessive", outFile)
+		domScores = runPlink (params, "dominant", outFile)
 		scores    = rbind (addScores, gnrScores, recScores, domScores)
 	}
 	scores     = scores [order (scores$DIFF, decreasing=T),]
@@ -45,7 +45,7 @@ runToolPlink <- function (params, tmpId="") {
 
 #-------------------------------------------------------------
 #-------------------------------------------------------------
-runPlinkCommand <- function (params, geneAction, outFile, tmpId="") 
+runPlink <- function (params, geneAction, outFile, tmpId="") 
 {
 	inGeno           = "out/filtered-plink-genotype"       # Only prefix for Plink
 	inPheno          = "out/filtered-plink-phenotype.tbl"  

@@ -1,0 +1,17 @@
+main()
+
+readCheckConfigParameters(configFile)
+
+tryCatch(yaml.load_file(paramsFile), error = function(cond) {
+    stop("Some errors in configuration file. Check for valid or repeated names!!!")
+})
+
+tryCatchList(expr, classes, parentenv, handlers)
+
+tryCatchOne(expr, names, parentenv, handlers[[1]])
+
+value[[3]](cond)
+
+stop("Some errors in configuration file. Check for valid or repeated names!!!")
+
+

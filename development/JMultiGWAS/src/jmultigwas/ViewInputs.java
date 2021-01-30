@@ -87,12 +87,12 @@ public class ViewInputs extends javax.swing.JPanel {
 
         fieldOutputDir.setEnabled(true);
         labelOutputDir.setEnabled(true);
-        selOutputDir.setEnabled(true);     
+        selOutputDirButton.setEnabled(true);     
     }
     public void enableMapComponents (boolean enableFlag) {
         mapLabel.setEnabled (enableFlag);
         mapText.setEnabled (enableFlag);
-        mapButton.setEnabled (enableFlag);
+        mapSelButton.setEnabled (enableFlag);
     } 
     
     // Init form with test mode options
@@ -180,14 +180,14 @@ public class ViewInputs extends javax.swing.JPanel {
         jLabel2 = new javax.swing.JLabel();
         genotypeLabel = new javax.swing.JLabel();
         genotypeText = new javax.swing.JTextField();
-        genotypeSelButton = new javax.swing.JButton();
+        selGenotypeButton = new javax.swing.JButton();
         genotypeFormatLabel = new javax.swing.JLabel();
         genotypeFormatCBox = new javax.swing.JComboBox<>();
-        selOutputDir = new javax.swing.JButton();
-        selPhenotypeBt = new javax.swing.JButton();
+        selOutputDirButton = new javax.swing.JButton();
+        selPhenotypeButton = new javax.swing.JButton();
         mapLabel = new javax.swing.JLabel();
         mapText = new javax.swing.JTextField();
-        mapButton = new javax.swing.JButton();
+        mapSelButton = new javax.swing.JButton();
         panelOptions = new javax.swing.JPanel();
         panelParametersTitle = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
@@ -249,10 +249,10 @@ public class ViewInputs extends javax.swing.JPanel {
         genotypeText.setToolTipText("Select genotype file");
         genotypeText.setPreferredSize(new java.awt.Dimension(90, 19));
 
-        genotypeSelButton.setText("Select...");
-        genotypeSelButton.addActionListener(new java.awt.event.ActionListener() {
+        selGenotypeButton.setText("Select...");
+        selGenotypeButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                genotypeSelButtonActionPerformed(evt);
+                selGenotypeButtonActionPerformed(evt);
             }
         });
 
@@ -265,17 +265,17 @@ public class ViewInputs extends javax.swing.JPanel {
             }
         });
 
-        selOutputDir.setText("Select...");
-        selOutputDir.addActionListener(new java.awt.event.ActionListener() {
+        selOutputDirButton.setText("Select...");
+        selOutputDirButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selOutputDirActionPerformed(evt);
+                selOutputDirButtonActionPerformed(evt);
             }
         });
 
-        selPhenotypeBt.setText("Select...");
-        selPhenotypeBt.addActionListener(new java.awt.event.ActionListener() {
+        selPhenotypeButton.setText("Select...");
+        selPhenotypeButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selPhenotypeBtActionPerformed(evt);
+                selPhenotypeButtonActionPerformed(evt);
             }
         });
 
@@ -286,11 +286,11 @@ public class ViewInputs extends javax.swing.JPanel {
         mapText.setEnabled(false);
         mapText.setPreferredSize(new java.awt.Dimension(90, 19));
 
-        mapButton.setText("Select...");
-        mapButton.setEnabled(false);
-        mapButton.addActionListener(new java.awt.event.ActionListener() {
+        mapSelButton.setText("Select...");
+        mapSelButton.setEnabled(false);
+        mapSelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mapButtonActionPerformed(evt);
+                mapSelButtonActionPerformed(evt);
             }
         });
 
@@ -311,11 +311,11 @@ public class ViewInputs extends javax.swing.JPanel {
                     .addComponent(fieldPheno, javax.swing.GroupLayout.DEFAULT_SIZE, 297, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelPathsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(selOutputDir, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(selOutputDirButton, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelPathsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(selPhenotypeBt, javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(genotypeSelButton, javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(mapButton)))
+                        .addComponent(selPhenotypeButton, javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(selGenotypeButton, javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(mapSelButton)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(genotypeFormatLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -333,26 +333,26 @@ public class ViewInputs extends javax.swing.JPanel {
             .addGroup(panelPathsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(panelPathsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(selOutputDir, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(selOutputDirButton, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(labelOutputDir)
                     .addComponent(fieldOutputDir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelPathsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(genotypeLabel)
                     .addComponent(genotypeText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(genotypeSelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(selGenotypeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(genotypeFormatLabel)
                     .addComponent(genotypeFormatCBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelPathsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(mapLabel)
                     .addComponent(mapText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(mapButton, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(mapSelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(8, 8, 8)
                 .addGroup(panelPathsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(fieldPheno, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(selPhenotypeBt, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(selPhenotypeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -564,8 +564,8 @@ public class ViewInputs extends javax.swing.JPanel {
         add(panelInputs, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void selOutputDirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selOutputDirActionPerformed
-        if (evt.getSource() == selOutputDir) {
+    private void selOutputDirButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selOutputDirButtonActionPerformed
+        if (evt.getSource() == selOutputDirButton) {
             fc.setCurrentDirectory(getLastDir());
             fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             int returnVal = fc.showOpenDialog(ViewInputs.this);
@@ -578,10 +578,10 @@ public class ViewInputs extends javax.swing.JPanel {
                 setEnabledInputs(true);
             }
         }
-    }//GEN-LAST:event_selOutputDirActionPerformed
+    }//GEN-LAST:event_selOutputDirButtonActionPerformed
 
-    private void selPhenotypeBtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selPhenotypeBtActionPerformed
-        if (evt.getSource() == selPhenotypeBt) {
+    private void selPhenotypeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selPhenotypeButtonActionPerformed
+        if (evt.getSource() == selPhenotypeButton) {
             fc.setCurrentDirectory(getLastDir());
             int returnVal = fc.showOpenDialog(ViewInputs.this);
             fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -591,11 +591,11 @@ public class ViewInputs extends javax.swing.JPanel {
                 fieldPheno.setText(file.getAbsolutePath());
             }
         }
-    }//GEN-LAST:event_selPhenotypeBtActionPerformed
+    }//GEN-LAST:event_selPhenotypeButtonActionPerformed
 
-    private void genotypeSelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_genotypeSelButtonActionPerformed
+    private void selGenotypeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selGenotypeButtonActionPerformed
         //Handle open button action.
-        if (evt.getSource() == genotypeSelButton) {
+        if (evt.getSource() == selGenotypeButton) {
             fc.setCurrentDirectory(getLastDir());
             fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             int returnVal = fc.showOpenDialog(ViewInputs.this);
@@ -607,7 +607,7 @@ public class ViewInputs extends javax.swing.JPanel {
                 prefs.put(LAST_USED_FOLDER, fc.getSelectedFile().getParent());
             }
         }        // TODO add your handling code here:
-    }//GEN-LAST:event_genotypeSelButtonActionPerformed
+    }//GEN-LAST:event_selGenotypeButtonActionPerformed
 
     private void fieldFilteringActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fieldFilteringActionPerformed
         boolean flag = false;
@@ -622,9 +622,18 @@ public class ViewInputs extends javax.swing.JPanel {
             c.setEnabled(flag);
     }//GEN-LAST:event_fieldFilteringActionPerformed
 
-    private void mapButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mapButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_mapButtonActionPerformed
+    private void mapSelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mapSelButtonActionPerformed
+         if (evt.getSource() == mapSelButton) {
+            fc.setCurrentDirectory(getLastDir());
+            int returnVal = fc.showOpenDialog(ViewInputs.this);
+            fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                //This is where a real application would open the file.
+                mapText.setText(file.getAbsolutePath());
+            }
+        }
+    }//GEN-LAST:event_mapSelButtonActionPerformed
 
     private void genotypeFormatCBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_genotypeFormatCBoxActionPerformed
         String selection = genotypeFormatCBox.getSelectedItem().toString();
@@ -654,7 +663,6 @@ public class ViewInputs extends javax.swing.JPanel {
     private javax.swing.JComboBox<String> genotypeFormatCBox;
     private javax.swing.JLabel genotypeFormatLabel;
     private javax.swing.JLabel genotypeLabel;
-    private javax.swing.JButton genotypeSelButton;
     private javax.swing.JTextField genotypeText;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel15;
@@ -671,8 +679,8 @@ public class ViewInputs extends javax.swing.JPanel {
     private javax.swing.JLabel labelInputOutput;
     private javax.swing.JLabel labelOutputDir;
     private javax.swing.JLabel labelPloidy;
-    private javax.swing.JButton mapButton;
     private javax.swing.JLabel mapLabel;
+    private javax.swing.JButton mapSelButton;
     private javax.swing.JTextField mapText;
     private javax.swing.JPanel panelFilesTitle;
     private javax.swing.JPanel panelFilters;
@@ -682,7 +690,8 @@ public class ViewInputs extends javax.swing.JPanel {
     private javax.swing.JPanel panelParameters;
     private javax.swing.JPanel panelParametersTitle;
     private javax.swing.JPanel panelPaths;
-    private javax.swing.JButton selOutputDir;
-    private javax.swing.JButton selPhenotypeBt;
+    private javax.swing.JButton selGenotypeButton;
+    private javax.swing.JButton selOutputDirButton;
+    private javax.swing.JButton selPhenotypeButton;
     // End of variables declaration//GEN-END:variables
 }

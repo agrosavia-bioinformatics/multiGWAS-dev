@@ -161,7 +161,7 @@ public class ViewToolBar extends javax.swing.JPanel {
 
         panelTools.add(panelGeneAction);
 
-        panelRun.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        panelRun.setLayout(null);
 
         buttonRun.setText("Run");
         buttonRun.addActionListener(new java.awt.event.ActionListener() {
@@ -169,7 +169,8 @@ public class ViewToolBar extends javax.swing.JPanel {
                 buttonRunActionPerformed(evt);
             }
         });
-        panelRun.add(buttonRun, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 40, -1, -1));
+        panelRun.add(buttonRun);
+        buttonRun.setBounds(40, 40, 61, 25);
 
         panelTools.add(panelRun);
 

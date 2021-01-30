@@ -100,11 +100,11 @@
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="selOutputDir" alignment="1" min="-2" max="-2" attributes="0"/>
+                              <Component id="selOutputDirButton" alignment="1" min="-2" max="-2" attributes="0"/>
                               <Group type="103" alignment="1" groupAlignment="0" attributes="0">
-                                  <Component id="selPhenotypeBt" alignment="1" min="-2" max="-2" attributes="0"/>
-                                  <Component id="genotypeSelButton" alignment="1" min="-2" max="-2" attributes="0"/>
-                                  <Component id="mapButton" min="-2" max="-2" attributes="0"/>
+                                  <Component id="selPhenotypeButton" alignment="1" min="-2" max="-2" attributes="0"/>
+                                  <Component id="selGenotypeButton" alignment="1" min="-2" max="-2" attributes="0"/>
+                                  <Component id="mapSelButton" min="-2" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                           <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -128,7 +128,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="selOutputDir" alignment="3" min="-2" pref="19" max="-2" attributes="0"/>
+                              <Component id="selOutputDirButton" alignment="3" min="-2" pref="19" max="-2" attributes="0"/>
                               <Component id="labelOutputDir" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="fieldOutputDir" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
@@ -136,7 +136,7 @@
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="genotypeLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="genotypeText" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="genotypeSelButton" alignment="3" min="-2" pref="19" max="-2" attributes="0"/>
+                              <Component id="selGenotypeButton" alignment="3" min="-2" pref="19" max="-2" attributes="0"/>
                               <Component id="genotypeFormatLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="genotypeFormatCBox" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
@@ -144,13 +144,13 @@
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="mapLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="mapText" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="mapButton" alignment="3" min="-2" pref="19" max="-2" attributes="0"/>
+                              <Component id="mapSelButton" alignment="3" min="-2" pref="19" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace min="-2" pref="8" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="fieldPheno" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="selPhenotypeBt" alignment="3" min="-2" pref="19" max="-2" attributes="0"/>
+                              <Component id="selPhenotypeButton" alignment="3" min="-2" pref="19" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="32767" attributes="0"/>
                       </Group>
@@ -195,12 +195,12 @@
                     </Property>
                   </Properties>
                 </Component>
-                <Component class="javax.swing.JButton" name="genotypeSelButton">
+                <Component class="javax.swing.JButton" name="selGenotypeButton">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Select..."/>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="genotypeSelButtonActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selGenotypeButtonActionPerformed"/>
                   </Events>
                 </Component>
                 <Component class="javax.swing.JLabel" name="genotypeFormatLabel">
@@ -228,20 +228,20 @@
                     <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
                   </AuxValues>
                 </Component>
-                <Component class="javax.swing.JButton" name="selOutputDir">
+                <Component class="javax.swing.JButton" name="selOutputDirButton">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Select..."/>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selOutputDirActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selOutputDirButtonActionPerformed"/>
                   </Events>
                 </Component>
-                <Component class="javax.swing.JButton" name="selPhenotypeBt">
+                <Component class="javax.swing.JButton" name="selPhenotypeButton">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Select..."/>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selPhenotypeBtActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selPhenotypeButtonActionPerformed"/>
                   </Events>
                 </Component>
                 <Component class="javax.swing.JLabel" name="mapLabel">
@@ -259,13 +259,13 @@
                     </Property>
                   </Properties>
                 </Component>
-                <Component class="javax.swing.JButton" name="mapButton">
+                <Component class="javax.swing.JButton" name="mapSelButton">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Select..."/>
                     <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mapButtonActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mapSelButtonActionPerformed"/>
                   </Events>
                 </Component>
               </SubComponents>

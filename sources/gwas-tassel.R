@@ -65,11 +65,11 @@ runToolTassel <- function (params) {
 	else if (params$geneAction == "general") 
 		scoresTableAll <- createTableTassel (results, "general", "p")
 	else if (params$geneAction == "dominant") 
-		scoresTableAll <- createTableTassel (results, "dominant", "dom_p")
+		scoresTableAll <- createTableTassel (results, "dominant", "p")
 	else if (params$geneAction == "all") { 
 		addTable <- createTableTassel (results, "additive", "add_p")
 		domTable <- createTableTassel (results, "general", "p")
-		gnrTable <- createTableTassel (results, "dominant", "dom_p")
+		gnrTable <- createTableTassel (results, "dominant", "p")
 		scoresTableAll <- rbind (addTable, domTable, gnrTable)
 	}
 	colnames (scoresTableAll)[colnames(scoresTableAll) %in% c("Chr","Pos")] = c ("CHR","POS")

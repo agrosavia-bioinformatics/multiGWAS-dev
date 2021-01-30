@@ -1,4 +1,47 @@
 #-------------------------------------------------------------
+#-------------------------------------------------------------
+getOperatingSystem <- function(){
+  sysinf <- Sys.info()
+  if (!is.null(sysinf)){
+  os <- sysinf['sysname']
+  if (os == 'Darwin')
+    os <- "osx"
+  } else { ## mystery machine
+    os <- .Platform$OS.type
+    if (grepl("^darwin", R.version$os))
+      os <- "osx"
+    if (grepl("linux-gnu", R.version$os))
+      os <- "linux"
+  }
+  tolower(as.character (os))
+}
+#-------------------------------------------------------------
+# Calculate the inflation factor from -log10 values
+# It can fire warning, here they are hidign
+#-------------------------------------------------------------
+calculateInflationFactor <- function (scores)
+{
+	oldw <- getOption("warn")
+	options(warn = -1)
+
+	remove <- which(is.na(scores))
+	if (length(remove)>0) 
+		x <- sort(scores[-remove],decreasing=TRUE)
+	else 
+		x <- sort(scores,decreasing=TRUE)
+
+	pvalues = 10^-x
+	chisq <- na.omit (qchisq(1-pvalues,1))
+	delta  = round (median(chisq)/qchisq(0.5,1), 3)
+
+	options (warn = oldw)
+
+	return (list(delta=delta, scores=x))
+}
+
+
+
+#-------------------------------------------------------------
 # Adjust both pValues and threshold (for Bonferroni)
 # Calculate threshold to decide SNPs significance
 #-------------------------------------------------------------
@@ -63,3 +106,47 @@ calculateQValue <- function(p) {
         }
         return(qvalue)
 }
+
+#-------------------------------------------------------------
+# Print a log message with the parameter
+#-------------------------------------------------------------
+msg <- function (...) 
+{
+  messages = unlist (list (...))
+  cat (">>>>", messages, "\n")
+}
+
+msgmsg <- function (...) 
+{
+  messages = unlist (list (...))
+  cat ("\t>>", messages, "\n")
+}
+
+msgmsgmsg <- function (...)
+{
+  messages = unlist (list (...))
+  message ("\t\t>", messages)
+}
+
+msgError <- function (...) {
+		messages = unlist (list (...))
+		cat (strrep("-", sum(sapply(messages, nchar))),"\n")
+		cat (messages, "\n")
+		cat (strrep("-", sum(sapply(messages, nchar))),"\n")
+}
+
+#-------------------------------------------------------------
+# Add label to filename and new extension (optional)
+#-------------------------------------------------------------
+addLabel <- function (filename, label, newExt=NULL)  {
+	nameext = strsplit (filename, split="[.]")
+	name    = nameext [[1]][1] 
+	if (is.null (newExt))
+		ext     = nameext [[1]][2] 
+	else
+		ext     = newExt
+	newName = paste0 (nameext [[1]][1], "-", label, ".", ext )
+	return (newName)
+}
+
+
