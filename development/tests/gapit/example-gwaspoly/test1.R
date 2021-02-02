@@ -11,5 +11,5 @@ myGM = read.table(genoMapFile , head = TRUE)
 myGD = read.table(genoNumFile, head = TRUE)
 
 #Step 2: Run GAPIT
-myGAPIT <- GAPIT(Y=myY, GD=myGD, GM=myGM, model="BLINK")
+myGAPIT <- GAPIT(Y=myY, GD=myGD, GM=myGM, model="FarmCPU")
 

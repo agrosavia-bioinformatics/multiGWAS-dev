@@ -14,10 +14,12 @@ runToolShesis <- function (params)
 	geneAction = "additive"
 
 	if (params$gwasModel == "naive") {
-		gwaspToShesisGenoPheno (params$genotypeFile, params$phenotypeFile, params$ploidy, params$traitType)
+		dataShesis = gwaspolyToShesisGenoPheno (params$genotypeFile, params$phenotypeFile, params$ploidy, params$traitType)
 	} else if (params$gwasModel == "full") {
 		# Apply kinship and filter individuals
-		inGeno  = "out/filtered-plink-genotype"       # Uses plink file
+		#inGeno  = "out/filtered-plink-genotype"       # Uses plink file
+		inGeno   = params$plinkGenotypeFile
+
 		kinFile = paste0 (inGeno,"-kinship-shesis")
 		cmm     = sprintf ("%s/sources/scripts/script-kinship-plink2.sh %s %s", HOME, inGeno, kinFile)
 		runCommand (cmm, "log-kinship.log")
@@ -35,41 +37,42 @@ runToolShesis <- function (params)
 		write.table (file=genotypeFileKinship,  genotypeKinship,  row.names=F, quote=F, sep=",")
 		write.table (file=phenotypeFileKinship, phenotypeKinship, row.names=F, quote=F, sep=",")
 
-		gwaspToShesisGenoPheno (genotypeFileKinship, phenotypeFileKinship, params$ploidy, params$traitType)
+		dataShesis = gwaspolyToShesisGenoPheno (genotypeFileKinship, phenotypeFileKinship, params$ploidy, params$traitType)
 	}
 
-	outFile      = paste0 ("out/tool-SHEsis-scores-", params$gwasModel)
-	scoresFile   = paste0 (outFile, ".csv")
-	scores       = runShesisCommand (params$traitType, outFile, params, geneAction)
-	write.table (scores, scoresFile, row.names=F, quote=F, sep="\t")
-	msg ("... Ending SHEsis")
+	shesis  = runShesisCommand (params$traitType, dataShesis$genoPhenoFile, dataShesis$markersFile, geneAction, params)
 
-	return (list (tool="SHEsis", scoresFile=scoresFile, scores=scores))
+	return (list (tool="SHEsis", scoresFile=shesis$scoresFile, scores=shesis$scoresMgwas))
 }
 
 #-------------------------------------------------------------
 #-------------------------------------------------------------
-runShesisCommand <- function (traitType, outFile, params, geneAction) {
-	inGenoPheno  = "out/filtered-shesis-genopheno.tbl"
-	inMarkers    = "out/filtered-shesis-markernames.tbl"
+runShesisCommand <- function (traitType, genoPhenoFile, markersFile, geneAction, params) 
+{
+	#genoPheno  = "out/filtered-shesis-genopheno.tbl"
+	#inMarkers    = "out/filtered-shesis-markernames.tbl"
+	scoresFile   = paste0 ("out/tool-SHEsis-scores-", params$gwasModel)
+	outFile      = paste0 (scoresFile, "-SOURCES")
 	flagQTL      = ifelse (traitType=="quantitative", "--qtl", "")
 
-	cmm=sprintf ("%s/sources/scripts/script-shesis-associations-qtl.sh %s %s %s %s %s", HOME, inGenoPheno, params$ploidy, inMarkers, outFile, flagQTL)
+	cmm=sprintf ("%s/sources/scripts/script-shesis-associations-qtl.sh %s %s %s %s %s", HOME, genoPhenoFile, params$ploidy, markersFile, outFile, flagQTL)
 	runCommand (cmm, "log-SHEsis.log")	
 
 	if (traitType=="quantitative")
-		resultsAll = createTableFromQuantitativeResults (outFile, params, geneAction)
+		scoresMgwas = createTableFromQuantitativeResults (outFile, params, geneAction)
 	else # case-control
-		resultsAll = createTableFromBinaryResults (outFile, params, geneAction)
+		scoresMgwas = createTableFromBinaryResults (outFile, params, geneAction)
 
-	return (resultsAll)
+	scoresMgwasFile = paste0 (scoresFile, ".csv")
+	write.table (scoresMgwas, scoresMgwasFile, row.names=F, quote=F, sep="\t")
+
+	return (list (tool="SHEsis", scoresFile=scoresMgwasFile, scoresMgwas=scoresMgwas))
 }
 #-------------------------------------------------------------
 # Create table from quantitative .txt file 
 #-------------------------------------------------------------
 createTableFromQuantitativeResults <- function (outFile, params, geneAction) {
 	resultsFile = paste0 (outFile, ".txt")
-
 	results  = read.table (file=resultsFile, header=T, sep="\t", check.names=T) # TRUE as SHEsis colnames have spaces
 
 	# LG: Added 1e-10 to avoid "inf" values in scores
@@ -90,7 +93,7 @@ createTableFromQuantitativeResults <- function (outFile, params, geneAction) {
 	GC  = calculateInflationFactor (scores)
 
 	model = geneAction
-	resultsAll <- data.frame (MODEL=model, GC=GC$delta, Marker, CHR, POS, P=pValues, SCORE=round (scores,6), THRESHOLD=round (threshold,6), DIFF=round (scores-threshold, 6), results)
+	resultsAll <- data.frame (MODEL=model, GC=GC$delta, Marker, CHR, POS, P=pValues, SCORE=round (scores,6), THRESHOLD=round (threshold,6), DIFF=round (scores-threshold, 6))
 	resultsAll <- resultsAll [order (resultsAll$DIFF, decreasing=T),]
 
 	return (resultsAll)
@@ -142,7 +145,6 @@ createTableFromBinaryResults <- function (outFile, params, geneAction) {
 	#pValues  = results[,"P.value"] + 1e-10
 
 	pValues  = results[,"pPearson"] 
-	print (pValues)
 	m        = length (pValues)
 	adj       = adjustPValues (0.01, pValues, params$correctionMethod)
 	message ("Formating 0 ...")
@@ -172,7 +174,7 @@ createTableFromBinaryResults <- function (outFile, params, geneAction) {
 #----------------------------------------------------------
 # Transform table genotype to SHEsis genotype format
 #----------------------------------------------------------
-gwaspToShesisGenoPheno <- function (genotypeFile, phenotypeFile, ploidy, traitType) 
+gwaspolyToShesisGenoPheno <- function (genotypeFile, phenotypeFile, ploidy, traitType) 
 {
 	msgmsg ("    >>>> Writting gwasp to shesis genopheno...")
 	sep <- function (allele) {
@@ -202,12 +204,16 @@ gwaspToShesisGenoPheno <- function (genotypeFile, phenotypeFile, ploidy, traitTy
 	pheno [,2]      = impute.mode (pheno [,2])
 	genoPhenoShesis = data.frame (Sample=pheno[,1], Trait=pheno[,2],  allelesMat)
 
-	msgmsg ("    >>>> Writing shesis genopheno...")
-	outFile = "out/filtered-shesis-genopheno.tbl"
-	write.table (file=outFile, genoPhenoShesis, quote=F,row.names=F,col.names=F, sep="\t")
+	msgmsg ("    >>>> Writing SHEsis genopheno...")
+	#outFile = "out/filtered-shesis-genopheno.tbl"
+	outFileGenoPheno = addLabel (genotypeFile, "SHESIS-GENOPHENO")
+	write.table (genoPhenoShesis, outFileGenoPheno, quote=F,row.names=F,col.names=F, sep="\t")
 
-	msgmsg ("    >>>> Writing shesis marker names...")
-	outFile = "out/filtered-shesis-markernames.tbl"
-	write.table (file=outFile, map[,1], quote=F,row.names=F,col.names=F, sep="\t")
+	msgmsg ("    >>>> Writing SHEsis marker names...")
+	#outFile = "out/filtered-shesis-markernames.tbl"
+	outFileMarkerNames = addLabel (genotypeFile, "SHESIS-MARKERNAMES")
+	write.table (map[,1], outFileMarkerNames, quote=F,row.names=F,col.names=F, sep="\t")
+
+	return (list(genoPhenoFile=outFileGenoPheno, markersFile=outFileMarkerNames))
 }
 

@@ -47,8 +47,8 @@ runToolPlink <- function (params, tmpId="") {
 #-------------------------------------------------------------
 runPlink <- function (params, geneAction, outFile, tmpId="") 
 {
-	inGeno           = "out/filtered-plink-genotype"       # Only prefix for Plink
-	inPheno          = "out/filtered-plink-phenotype.tbl"  
+	inGeno           = params$plinkGenotypeFile
+	inPheno          = params$plinkPhenotypeFile
 
 	if (tmpId!=""){
 		geno       = read.table (paste0(inGeno,".ped"), sep="\t", header=F)

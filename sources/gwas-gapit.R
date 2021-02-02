@@ -28,9 +28,10 @@ main <- function () {
 #-------------------------------------------------------------
 #-------------------------------------------------------------
 runToolGapit <- function (params) {
-	sink ("log-GAPIT-outputs.log")
-	scoresFile = paste0 ("out/tool-GAPIT-scores-", params$gwasModel, ".csv")
 
+	if (DEBUG==F) sink ("log-GAPIT-outputs.log")
+
+	scoresFile = paste0 ("out/tool-GAPIT-scores-", params$gwasModel, ".csv")
 	if (params$geneAction=="additive") {
 		scoresMgwas = runGapit ("additive", params$genotypeFile, params$phenotype, scoresFile, params)
 	}else if (params$geneAction=="dominant") {
@@ -41,7 +42,7 @@ runToolGapit <- function (params) {
 	}
 
 	write.table (scoresMgwas, scoresFile, sep="\t", row.names=F, quote=F)
-	sink ()
+	if (DEBUG==F) sink ()
 
 	return (list (tool="GAPIT", scoresFile=scoresFile, scores=scoresMgwas))
 }
@@ -49,15 +50,22 @@ runToolGapit <- function (params) {
 #-------------------------------------------------------------
 #-------------------------------------------------------------
 runGapit <- function (geneAction, genotypeFile, phenotypeFile, scoresFile, params) {
-	source (paste0 (HOME, "/sources/gapit_functions.R"), echo=F)      # Module with functions to convert between different genotype formats 
+	#source (paste0 (HOME, "/sources/gapit_functions.R"), echo=F)      # Module with functions to convert between different genotype formats 
+	library (compiler)
+	source (paste0 (HOME, "/sources/gapit_functions20201028.R"), echo=F)      # Module with functions to convert between different genotype formats 
 
-	gapit = gwaspolyToGapitFormat (genotypeFile, phenotypeFile, geneAction, FILES=F)
-	#genotype  = read.csv (gapit$geno)
-	#phenotype = read.csv (gapit$pheno)
-	#map       = read.csv (gapit$map)
+	#gapit = gwaspolyToGapitFormat (genotypeFile, phenotypeFile, geneAction, FILES=F)
+	genotype  = read.csv (params$gapitGenotypeFile)
+	phenotype = read.csv (params$gapitPhenotypeFile)
+	map       = read.csv (params$gapitMapFile)
+
+	if (tolower (params$gwasModel)=="full") 
+		gapitModel = "MLM"
+	else 
+		gapitModel = "GLM"
 
 	#out <- GAPIT(Y=phenotype, GM=map, GD=genotype, model="MLM", file.output=F)#, kinship.algorithm="None")
-	out <- GAPIT(Y=gapit$pheno, GM=gapit$map, GD=gapit$geno, model="MLM", file.output=F)#, kinship.algorithm="None")
+	out <- GAPIT(Y=phenotype, GM=map, GD=genotype, model="MLM", file.output=F)#, kinship.algorithm="None")
 	scoresGapit = out$GWAS
 
 	# Write source scores

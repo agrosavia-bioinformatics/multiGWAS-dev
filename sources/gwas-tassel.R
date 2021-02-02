@@ -3,12 +3,13 @@
 # Run Tassel pipeline (GDM and MLM)
 #-------------------------------------------------------------
 runToolTassel <- function (params) {
-	msgmsg ("Running Tassel GWAS...")
 	model = params$gwasModel
 
 	# Parameters for the scripts
-	inGenoVCF     = "out/filtered-tassel-genotype.vcf"
-	inPhenoTBL    = "out/filtered-tassel-phenotype.tbl"
+	#inGenoVCF     = "out/filtered-tassel-genotype.vcf"
+	#inPhenoTBL    = "out/filtered-tassel-phenotype.tbl"
+	inGenoVCF     = params$tasselGenotypeFile
+	inPhenoTBL    = params$tasselPhenotypeFile
 	outFile       = paste0 ("out/tool-TASSEL-scores-", model)
 	scoresFile    = paste0 (outFile, ".csv")
 
