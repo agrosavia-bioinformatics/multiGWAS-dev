@@ -1,1 +1,0 @@
-/home/lg/agrosavia/GWAS-TOOL/multiGWAS-dev/sources/gwas-gapit.R

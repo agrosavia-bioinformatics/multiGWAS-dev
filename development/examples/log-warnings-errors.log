@@ -1,5 +1,0 @@
-Starting summary...
-Error in markersManhattanPlots(listOfResultsFile, gwasModel, commonBest,  : 
-  trying to get slot "CHR" from an object (class "data.frame") that is not an S4 object 
-Calls: main -> createReports -> markersManhattanPlots
-Execution halted

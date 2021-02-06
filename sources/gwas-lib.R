@@ -169,8 +169,23 @@ view <- function (data, n=5,m=6) {
 	}
 	write.csv (data, paste0("x-", filename, ".csv"), quote=F, row.names=F)
 }
-viewx <- function (...) {
-	view (...)
+viewx <- function (data, n=5,m=6) {
+	filename = deparse (substitute (data))
+	name = paste (deparse (substitute (data)),":  ")
+	if (is.null (dim (data))) {
+		dimensions = paste (length (data))
+		message (name, class(data), " : (", paste0 (dimensions),")")
+		if (length (data) < 6) n = length(data)
+		print (data[1:n])
+	}else {
+		dimensions = paste0 (unlist (dim (data)),sep=c(" x ",""))
+		message (name, class(data), " : (", paste0 (dimensions),")")
+		if (n==0 | nrow (data) <= 5) n = nrow(data)
+		if (m==0 | ncol (data) <= 6) m = ncol(data)
+		print (data[1:n,1:m])
+	}
+	write.csv (data, paste0("x-", filename, ".csv"), quote=F, row.names=F)
+
 	quit()
 }
 

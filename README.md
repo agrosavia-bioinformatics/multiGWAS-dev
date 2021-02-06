@@ -195,14 +195,25 @@ Currently, MultiGWAS accepts five genotype formats: "gwaspoly", "kmatrix", "vcf"
 ```
 
 - ***"vcf" format:*** Variang Call Format (VCF) with metadata in the first lines followed by a header line. The following lines contain genotype information of the individuals for each position. VCF marker data can be encoded as simple genotype calls (GT format field, e.g. 0/0/1/1 for tetraploids or 0/1 for diploids) or using the NGSEP custom format fields (Tello et al., 2019): ACN, ADP or BSDP. An example follows:
-```
-##fileformat=VCFv4.2
-##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
-#CHROM  POS ID  REF ALT QUAL    FILTER  INFO    FORMAT  sample01    sample02    sample03
-   0   805179  c2_41437    A   G   .   .   PR  GT  0/1/1/0 0/1/1/0 0/1/0/0
-   0   1252430 c2_24258    G   A   .   .   PR  GT  0/1/0/0 0/1/1/0 0/0/1/0
-   0   3499519 c2_21332    T   C   .   .   PR  GT  0/1/1/0 0/1/1/1 0/1/1/0
-```
+
+  - Using the GT format key
+
+	```
+	##fileformat=VCFv4.2
+	[CLIPPED]
+	#CHROM   POS     ID  REF ALT QUAL FILTER INFO FORMAT   sample01    sample02 
+	   0   805179  c2_41  A   G    .    .     PR  GT:...  0/1/1/0:... 0/1/0/0:...
+	   0   1252430 c2_24  G   A    .    .     PR  GT:...  0/1/1/1:... 1/0/0/0:...
+	```
+
+  - Using the ACN format key
+	```
+	##fileformat=VCFv4.2
+	[CLIPPED]
+	#CHROM POS       ID  REF ALT QUAL FILTER INFO  FORMAT  sample01  sample02
+	   0   805179  c2_41  A   G    .    .     PR  ...:ACN  ...:2,2   ...:3,1
+	   0   1252430 c2_24  G   A    .    .     PR  ...:ACN  ...:1,3   ...:3,1
+	```
 
 - ***"fitpoly" format:*** table with tab separated values (scores file e.g. filePrefix_scores.dat) containing one line per sample for every marker that could be fitted. MultiGWAS uses only two columns from this file: "MarkerName" and "geno", with the name of the marker and the assigned genotype number, respectively. The genotype number is assigned according to the ploidy, for tetraploids from 0 to 4, and for diploids from 0 to 2. An example follows: 
 ```
@@ -210,9 +221,7 @@ Currently, MultiGWAS accepts five genotype formats: "gwaspoly", "kmatrix", "vcf"
 |--------|------------|----------------|-------|-------|-------|-------|-------|-------|---------|-------|------|
 | 1      | c1_1       | ACBrador       | 0.932 | 0.821 | 0.407 | 0.879 | 0.537 | 0.158 | 1       | 0.363 | 1    |
 | 1      | c1_1       | ACLPI175395    | 0.719 | 0.823 | 0.385 | 0.213 | 0.834 | 0.873 | 0       | 0.189 | 0    |
-| 1      | c1_1       | ADGPI195204    | 0.064 | 0.09  | 0.081 | 0.477 | 0.066 | 0.845 | 0       | 0.351 | 0    |
-| 1      | c1_1       | AdirondackBlue | 0.606 | 0.853 | 0.62  | 0.44  | 0.954 | 0.047 | 1       | 0.151 | 1    |
-| 1      | c1_1       | AdirondackRed  | 0.785 | 0.176 | 0.079 | 0.915 | 0.634 | 0.22  | 1       | 0.259 | 1    |
+
 ```
 
 - ***"updog" format:*** table with comma separated values containing one line per sample for every marker that could be fitted. MultiGWAS uses only two columns from this file: "snp" and "geno", with the name of the marker and the assigned genotype number, respectively. The genotype number is assigned according to the ploidy, for tetraploids from 0 to 4, and for diploids from 0 to 2. An example follows: 
@@ -220,9 +229,6 @@ Currently, MultiGWAS accepts five genotype formats: "gwaspoly", "kmatrix", "vcf"
 |     snp     | ind   | ref | size | geno | postmean | maxpostprob | Pr_0 | ... | Pr_4 | logL_0  | ... | logL_4 |
 |-------------|-------|-----|------|------|----------|-------------|------| ... |------|---------| ... |--------|
 |PotVar0089524|P3PEM05| 113 | 143  | 3    | 2.99     | 0.99        | 0    | ... | 0    | -176.49 | ... | -39    |
-|PotVar0089524|P2PEM10| 86  | 96   | 3    | 3        | 1           | 0    | ... | 0    | -172.23 | ... | -15.93 |
-|PotVar0089524|P5PEM08| 122 | 142  | 3    | 3        | 1           | 0    | ... | 0    | -201.39 | ... | -25.8  |
-|PotVar0089524|P7PEM09| 80  | 80   | 4    | 4        | 1           | 0    | ... | 1    | -190.47 | ... | -0.18  |
 |PotVar0089524|P5PEM04| 69  | 69   | 4    | 4        | 1           | 0    | ... | 1    | -172.29 | ... | -0.16  |
 ```
 

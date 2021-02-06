@@ -1,1 +1,0 @@
-/home/lg/agrosavia/GWAS/multiGWAS-dev/development/tests/best-model/tuber_shape/best-model-stats.R

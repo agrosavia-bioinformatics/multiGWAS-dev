@@ -1,1 +1,0 @@
-/home/lg/agrosavia/GWAS/multiGWAS-dev/development/data/berdugo/gwaspoly-berdugo/dev/filter-common-samples.R

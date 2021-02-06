@@ -30,6 +30,7 @@ library(kableExtra)
 ```{r  echo=FALSE, message=FALSE}
 inputDir = paste0 (params$workingDir, "/report/")
 nBest    = params$nBest
+R2       = params$R2
 ```
 
 ```{r setKnitOptions, include=FALSE}
@@ -47,6 +48,15 @@ The following table shows the current input parameters specified by the user in 
 ```{r printTableInputParameters }
 paramsDF = read.table (file=paste0(inputDir,"out-multiGWAS-inputParameters.tbl"), header=T, sep="\t")
 kable (paramsDF) %>%
+ 	kable_styling(bootstrap_options = c("striped", "hover", "condensed", font_size=5))
+```
+
+# SNPs in Linkage Disequilibrium
+The following table shows the SNPs in Linkage Disequilibrium above $R^2$ = `r R2`
+
+```{r SNPsLDTable,  echo=FALSE, message=FALSE}
+SNPsLDTable = read.csv (file=paste0(inputDir, "/out-multiGWAS-SNPsLDTable.csv"))
+kable (SNPsLDTable) %>%
  	kable_styling(bootstrap_options = c("striped", "hover", "condensed", font_size=5))
 ```
 

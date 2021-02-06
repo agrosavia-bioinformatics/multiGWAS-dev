@@ -42,13 +42,14 @@ main <- function ()
 	#convertUpdogToKMatrix (args [1])
 	#convertUpdogToGwaspolyGenotype (args [1], args [2])
 
-	args = c ("example-genotype-tetra-gwaspoly-ACGT.csv", "example-phenotype-single-trait.csv")
- 
+	## Missing filter
+	#args = c ("example-genotype-tetra-gwaspoly-ACGT.csv", "example-phenotype-single-trait.csv")
+	#genotypeFile = args [1]
+	#geno = filterByMissingMarkersAndSamples (genotypeFile, 0.3, 0.2)
+
 	genotypeFile = args [1]
-
-	geno = filterByMissingMarkersAndSamples (genotypeFile, 0.3, 0.2)
-	print (geno)
-
+	#convertACGTGWASpolyToGenodiveACGTGenotypeFormat  (genotypeFile) 
+	convertVCFToACGTByNGSEP (genotypeFile) 
 }
 
 #-------------------------------------------------------------
@@ -133,8 +134,6 @@ filterByMissingMarkersAndSamples <- function (genotypeFile, callRateSNPs, callRa
 		write.csv (names (badSamples), outFile, quote=F, row.names=F)
 	}
 
-	print (length(markers))
-	print (length (samples))
 	noMissingGeno      = cbind (geno [markers, 1:3], geno [markers, samples])
 	noMissingGenoFile  = addLabel (genotypeFile, "noMISSING")
 	message (">>>>>>>>>>>>>>>>>>>")
@@ -253,6 +252,7 @@ gwaspolyToGapitFormat <- function (genotypeFile, phenotypeFile, geneAction, FILE
 	# are coded 0 and heterozygous genotypes are coded 1.
 	if (geneAction=="additive") {
 		gapitNumFile = addLabel (genotypeFile, "GAPIT-NUM-ADD")
+		write.csv (genoNumGapit, gapitNumFile, quote=F, row.names=F)
 	}else if (geneAction=="dominant") {
 		# 0,2 -> 0, 1->1
 		genoNumGapitValues = genoNumGapit [,-1] 
@@ -300,7 +300,7 @@ gwaspolyToGapitFormat <- function (genotypeFile, phenotypeFile, geneAction, FILE
 	gapitMapFile = addLabel (genotypeFile, "GAPIT-MAP")
 	write.csv (genoMap, gapitMapFile, quote=F, row.names=F)
 
-	return (list (genoHET=gapitNumFile, pheno=gapitPhenoFile, map=gapitMapFile))
+	return (list (geno=gapitNumFile, pheno=gapitPhenoFile, map=gapitMapFile))
 }
 
 #-------------------------------------------------------------

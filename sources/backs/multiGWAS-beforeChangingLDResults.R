@@ -18,6 +18,7 @@ params <- list ()
 	# r1.8: Add linkage disequilibrium analysis
 	# r1.5: Using VCF files
 	# r1.3: Added column gene action model to tables of results by tool
+	# r1.2: Separate SHEsis/Plink Kinship. Reduced code (runGWAStools, ped, bed)
 
 #-------------------------------------------------------------
 # Return string with usage instructions
@@ -80,7 +81,7 @@ initGlobalEnvironment <- function ()
 
 	# Load sources
 	source (paste0 (HOME, "/sources/gwas-preprocessing.R"))      # Module with functions to convert between different genotype formats 
-	source (paste0 (HOME, "/sources/gwas-reports.R"))            # Module with functions to create summaries: tables and venn diagrams
+	source (paste0 (HOME, "/sources/gwas-summary.R"))            # Module with functions to create summaries: tables and venn diagrams
 	source (paste0 (HOME, "/sources/gwas-heatmap.R"))            # Module with functions to create heatmaps for shared SNPs
 	source (paste0 (HOME, "/sources/gwas-gwaspoly.R"))           # Module with gwaspoly functions
 	source (paste0 (HOME, "/sources/gwas-plink.R"))              # Module with plink functions
@@ -132,13 +133,11 @@ mainSingleTrait <- function (traitParamsFile) {
 	params$nBest           = as.integer (params$nBest)
 
 	# Run the four tools in parallel
-	results           = runGWASTools (params)
-	listOfResultsFile = results$BestList
-	SNPsLDTable       = results$SNPsLDTable
+	listOfResultsFile = runGWASTools (params)
 
 	# Create reports
 	msg ("Creating reports (Table, Venn diagrams, Manhattan&QQ plots, SNP profiles)...")
-	createReports (listOfResultsFile, SNPsLDTable, params)
+	createReports (listOfResultsFile, params)
 
 	# Move out files to output dir
 	msg ("Moving files to output folders...")
@@ -265,7 +264,7 @@ runGWASTools <- function (params) {
 		else if (tool=="plink")    runToolPlink (params)
 		else if (tool=="shesis")   runToolShesis (params)
 		else if (tool=="tassel")   runToolTassel (params)
-		else if (tool=="gapit")    runToolGapit (params)
+		else if (tool=="gapit")   runToolGapit (params)
 		else                       stop ("Tool not supported")
 	}
 
@@ -279,10 +278,9 @@ runGWASTools <- function (params) {
 
 	listOfResultsFileBest = selectBestGeneActionModelAllTools (listOfResultsFile, params$geneAction, params$nBest)
 
-	SNPsLDTable           = getSNPsHighLDAllTools (listOfResultsFileBest, params)
-
+	#listOfResultsFileLD   = analizeLinkageDisequilibriumSNPsTools (listOfResultsFileBest, params)
 	#return (listOfResultsFileLD)
-	return (list (BestList=listOfResultsFileBest, SNPsLDTable=SNPsLDTable))
+	return (listOfResultsFileBest)
 }
 
 #-----------------------------------------------------------
@@ -369,61 +367,10 @@ selectBestGeneActionModelTool <- function (scoresTool, nBest, tool, geneAction) 
 }
 
 #-------------------------------------------------------
-# Create a table for SNPs in all tools in high LD
+# Analyze Linkage Disequilibrium for SNPs of each tool
+# SNPs in high LD are removed from their resulting scores
 #-------------------------------------------------------
-getSNPsHighLDAllTools <- function (listOfResultsFile, params) {
-	msg ("Analyzing linkage disequilibrium for SNPs in each tool...")
-	# Create table with all scores
-	snpsLDTable = NULL
-	for (res in listOfResultsFile) {
-		scoresTool = data.frame (TOOL=res$tool, res$scores [,1:9]) # 1:9 are the first common columns for scores
-		snpsLD     = getSNPsHighLDTool (params$genotypeNumFile, scoresTool, 0.9, params$nBest, res$tool)
-		snpsLDTable = rbind (snpsLDTable, snpsLD)
-	}
-
-	return (snpsLDTable)
-}
-
-#-----------------------------------------------------------------------
-# Return a vector of SNPs in high LD
-#-----------------------------------------------------------------------
-getSNPsHighLDTool <- function (genoNumFile, scores, maxLD, maxBest, tool) {
-	if (!exists ("genotypeNum")) 
-		genotypeNum    <<- read.csv (genoNumFile, row.names=1);
-
-	genomat = as.matrix (genotypeNum [,-1:-2]); 
-
-	# Get Top SNPs from score file
-	N = if (length (scores$Marker) > 2*maxBest) 2*maxBest else length (scores$Marker) 
-	snpList = as.character (scores$Marker [1:N]) 
-
-	# Get genotypes for SNPs and calculate LD matrix (r2)
-	genomatSNPs = genomat [snpList,]; 
-	ldMatrixAll = mldest(genomatSNPs, K = 4, nc = NCORES, type = "comp", se=F);
-	ldMatrix    = ldMatrixAll [,c(3,4,7)]
-
-	# Create a table with LD SNPs
-	i=1
-	snpsLD = NULL
-	msgmsg (tool)
-	while (i <= nrow (ldMatrix)) {
-		if (ldMatrix[i,"r2"] > maxLD) {
-			msgmsg (sprintf ("SNPs of %s in high LD: %s and %s with R2=%s", tool,  ldMatrix[i,"snpi"], ldMatrix[i,"snpj"], ldMatrix[i,"r2"]))
-			df     = data.frame (TOOL=tool,SNP1=ldMatrix [i, "snpi"], SNP2=ldMatrix [i, "snpj"], R2=ldMatrix[i,"r2"])
-			snpsLD = rbind (snpsLD, df)
-			#snpj     = ldMatrix [i, "snpj"]
-			#ldMatrix = ldMatrix [ldMatrix$snpi != snpj,]
-			#snpsLD   = c(snpsLD, snpj)
-		}
-		i = i+1
-	}
-	return (snpsLD)
-}
-
-#-------------------------------------------------------
-# Analyze and remove for each tool SNPs in high LD
-#-------------------------------------------------------
-removeLinkageDisequilibriumSNPsTools <- function (listOfResultsFile, params) {
+analizeLinkageDisequilibriumSNPsTools <- function (listOfResultsFile, params) {
 	msg ("Analyzing linkage disequilibrium for SNPs in each tool...")
 	# Create table with all scores
 	scoresAll = NULL
@@ -451,6 +398,40 @@ removeLinkageDisequilibriumSNPsTools <- function (listOfResultsFile, params) {
 	}
 
 	return (listOfResultsFile)
+}
+
+#-----------------------------------------------------------------------
+# Return a vector of SNPs in high LD
+#-----------------------------------------------------------------------
+matchSNPsByLDSingleTool <- function (genoNumFile, scores, maxLD, maxBest, tool) {
+	if (!exists ("genotypeNum")) 
+		genotypeNum    <<- read.csv (genoNumFile, row.names=1);
+
+	genomat = as.matrix (genotypeNum [,-1:-2]); 
+
+	# Get Top SNPs from score file
+	N = if (length (scores$Marker) > 2*maxBest) 2*maxBest else length (scores$Marker) 
+	snpList = as.character (scores$Marker [1:N]) 
+
+	# Get genotypes for SNPs and calculate LD matrix (r2)
+	genomatSNPs = genomat [snpList,]; 
+	ldMatrixAll = mldest(genomatSNPs, K = 4, nc = NCORES, type = "comp", se=F);
+	ldMatrix    = ldMatrixAll [,c(3,4,7)]
+
+	# Get SNPs with LD SNPs
+	i=1
+	snpsLD = c()
+	message (tool)
+	while (i <= nrow (ldMatrix)) {
+		if (ldMatrix[i,"r2"] > maxLD) {
+			msgmsg (sprintf ("SNPs of %s in high LD: %s and %s with R2=%s", tool,  ldMatrix[i,"snpi"], ldMatrix[i,"snpj"], ldMatrix[i,"r2"]))
+			snpj     = ldMatrix [i, "snpj"]
+			ldMatrix = ldMatrix [ldMatrix$snpi != snpj,]
+			snpsLD   = c(snpsLD, snpj)
+		}
+		i = i+1
+	}
+	return (snpsLD)
 }
 
 #-------------------------------------------------------------
